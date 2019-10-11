@@ -27,7 +27,31 @@ exports.listPrices = function(req, res){
         .catch(err => reject('failed'))
     });
 
-    Promise.all([asociacionAhorros, bancoCaribe, bancoPromerica]).then(data => {
+    const lopezDeHaroPrices =  new Promise((resolve, reject) => {
+        scraper.getLopezDeHaroPrices()
+            .then(data => {
+            resolve(data);
+            })
+            .catch(err => reject('failed'))
+        });
+    
+    const bancoBdiPrices =  new Promise((resolve, reject) => {
+        scraper.getBancoBdiPrices()
+            .then(data => {
+            resolve(data);
+            })
+            .catch(err => reject('failed'))
+        });    
+
+    const banescoPrices =  new Promise((resolve, reject) => {
+        scraper.getBanescoPrices()
+            .then(data => {
+            resolve(data);
+            })
+            .catch(err => reject('failed'))
+        });  
+
+    Promise.all([asociacionAhorros, bancoCaribe, bancoPromerica, lopezDeHaroPrices, bancoBdiPrices, banescoPrices]).then(data => {
         res.send(data);
     }).catch(err => res.status(500).send(err))
 }

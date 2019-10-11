@@ -25,13 +25,13 @@ const getAsociacionAhorrosPrices = async () =>{
            
             await page.click(`.btn-group > .dropdown-menu > .list-inline > li:nth-child(${i}) > .dropdown-item`);
     
-            let buyElement = await page.$("#currency-buy");
+            const buyElement = await page.$("#currency-buy");
            
-            let sellElement = await page.$("#currency-sell");
+            const sellElement = await page.$("#currency-sell");
 
-            let buyPrice = await page.evaluate(element => element.textContent, buyElement);
+            const buyPrice = await page.evaluate(element => element.textContent, buyElement);
             
-            let sellPrice = await page.evaluate(element => element.textContent, sellElement);
+            const sellPrice = await page.evaluate(element => element.textContent, sellElement);
 
             if(i == 1){
                 prices.dollarBuy = buyPrice;
@@ -76,7 +76,7 @@ const getBancoCaribePrices = async () =>{
     
     await browser.close();
 
-    let prices = {'name': 'banco caribe', 'dollarBuy': buyPrice, 'dollarSell': sellPrice, 'euroBuy': euroBuyPrice, 'euroSell': euroSellPrice};
+    const prices = {'name': 'banco caribe', 'dollarBuy': buyPrice, 'dollarSell': sellPrice, 'euroBuy': euroBuyPrice, 'euroSell': euroSellPrice};
 
     return prices;
 }
@@ -107,13 +107,110 @@ const getPromericaPrices = async () => {
     const euroBuyPrice = await page.evaluate(element => element.textContent, buyEuroElement);
     const euroSellPrice = await page.evaluate(element => element.textContent, sellEuroElement);
 
-    let prices = {'name': 'banco promerica', 'dollarBuy': buyPrice, 'dollarSell': sellPrice, 'euroBuy': euroBuyPrice, 'euroSell': euroSellPrice};
+    const prices = {'name': 'banco promerica', 'dollarBuy': buyPrice, 'dollarSell': sellPrice, 'euroBuy': euroBuyPrice, 'euroSell': euroSellPrice};
 
     await browser.close();
 
     return prices;
 }
 
+const getLopezDeHaroPrices = async () => {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    
+    await page.goto('https://www.blh.com.do/');
+    
+    await page.setViewport({ width: 1920, height: 937 });
+    
+    await page.waitForSelector('.instance-5 > .vc_column-inner > .wpb_wrapper > .iwithtext > .iwt-text > p');
+   
+    const buyElement = await page.$('.instance-5 > .vc_column-inner > .wpb_wrapper > .iwithtext > .iwt-text > p');
+    const sellElement = await page.$('.instance-5 > .vc_column-inner > .wpb_wrapper > .iwithtext > .iwt-text > p');
+    
+    const text = await page.evaluate(element => element.textContent, buyElement);
+    
+    const buyPrice = text.substring(26, 31);
+    const sellPrice = text.substring(34, 39);
+    const euroBuyPrice = text.substring(47, 52);
+    const euroSellPrice = text.substring(55, 60);
+
+    const prices = {'name': 'banco lopez de haro', 'dollarBuy': buyPrice, 'dollarSell': sellPrice, 'euroBuy': euroBuyPrice, 'euroSell': euroSellPrice};
+
+    await browser.close();
+
+    return prices;
+}
+
+const getBancoBdiPrices = async () => {
+  const browser = await puppeteer.launch();
+  
+  const page = await browser.newPage();
+  
+  await page.goto('https://www.bdi.com.do/');
+  
+  await page.setViewport({ width: 1920, height: 937 });
+  
+  const replaceBuy = "Compra";
+  const replaceSell = "Venta";
+
+  await page.waitForSelector('.container > .row > .col-sm-6 > .flright > li:nth-child(4)');
+  
+  const buyElement = await page.$('.container > .row > .col-sm-6 > .flright > li:nth-child(4)');
+  const sellElement = await page.$('.container > .row > .col-sm-6 > .flright > .mc_xs_item');
+
+  const textBuyPrice = await page.evaluate(element => element.textContent, buyElement);
+  const textSellPrice = await page.evaluate(element => element.textContent, sellElement);
+
+  await page.waitForSelector('.container > .row > .separator > .mc_list > li:nth-child(4)')
+ 
+  const euroBuyElement = await page.$('.container > .row > .separator > .mc_list > li:nth-child(4)');
+  const euroSellElement = await page.$('.container > .row > .separator > .mc_list > .mc_xs_item');
+
+  const textEuroBuyPrice = await page.evaluate(element => element.textContent, euroBuyElement);
+  const textEuroSellPrice = await page.evaluate(element => element.textContent, euroSellElement);
+   
+  const buyPrice = textBuyPrice.replace(replaceBuy, "").trim();
+  const sellPrice = textSellPrice.replace(replaceSell, "").trim();
+
+  const euroBuyPrice = textEuroBuyPrice.replace(replaceBuy, "").trim();
+  const euroSellPrice = textEuroSellPrice.replace(replaceSell, "").trim();
+
+  const prices = {'name': 'banco bdi', 'dollarBuy': buyPrice, 'dollarSell': sellPrice, 'euroBuy': euroBuyPrice, 'euroSell': euroSellPrice};
+
+  await browser.close();
+
+  return prices;
+}
+
+const getBanescoPrices = async () => {
+    const browser = await puppeteer.launch()
+  const page = await browser.newPage()
+  
+  await page.goto('https://www.banesco.com.do/')
+  
+  await page.setViewport({ width: 1920, height: 182 })
+  
+  await page.waitForSelector('.views-element-container > .js-view-dom-id-619249347379f7723431a258644aa600479aa8ae37f98a10cba2626d94de4e53 > .view-content > .views-row > p:nth-child(3)')
+  
+  const pricesElement = await page.$('.views-element-container > .js-view-dom-id-619249347379f7723431a258644aa600479aa8ae37f98a10cba2626d94de4e53 > .view-content > .views-row > p:nth-child(3)');
+    
+  const textBuy = await page.evaluate(element => element.textContent, pricesElement);
+  
+  const buyPrice = textBuy.substring(12, 17);
+  const sellPrice = textBuy.substring(24, 29)
+  const euroBuyPrice = textBuy.substring(41, 46);
+  const euroSellPrice = textBuy.substring(52, 57);
+
+  const prices = {'name': 'banesco', 'dollarBuy': buyPrice, 'dollarSell': sellPrice, 'euroBuy': euroBuyPrice, 'euroSell': euroSellPrice};
+
+  await browser.close();
+
+  return prices;
+}
+
 module.exports.getAsociacionAhorrosPrices = getAsociacionAhorrosPrices;
 module.exports.getPromericaPrices = getPromericaPrices;
 module.exports.getBancoCaribePrices = getBancoCaribePrices;
+module.exports.getLopezDeHaroPrices = getLopezDeHaroPrices;
+module.exports.getBancoBdiPrices = getBancoBdiPrices;
+module.exports.getBanescoPrices = getBanescoPrices;
