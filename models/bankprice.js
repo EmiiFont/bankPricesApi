@@ -1,4 +1,4 @@
-let BankPrice = class {
+class BankPrice {
     constructor(name, dollarBuy, dollarSell, euroBuy, euroSell) {
       this.name = name;
       this.dollarBuy = dollarBuy;
@@ -7,3 +7,5 @@ let BankPrice = class {
       this.euroSell = euroSell;
     }
   };
+
+  module.exports = BankPrice;

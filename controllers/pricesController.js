@@ -8,7 +8,7 @@ exports.listPrices = function(req, res){
        .then(data => {
          resolve(data);
        })
-       .catch(err => reject('failed'))
+       .catch(err => reject('asociacion failed: ' + err))
    });
 
   const bancoCaribe =  new Promise((resolve, reject) => {
@@ -16,7 +16,7 @@ exports.listPrices = function(req, res){
         .then(data => {
         resolve(data);
         })
-        .catch(err => reject('failed'))
+        .catch(err => reject('banco caribe failed: ' + err))
     });
 
     const bancoPromerica =  new Promise((resolve, reject) => {
@@ -24,7 +24,7 @@ exports.listPrices = function(req, res){
         .then(data => {
         resolve(data);
         })
-        .catch(err => reject('failed'))
+        .catch(err => reject('promerica failed: ' + err))
     });
 
     const lopezDeHaroPrices =  new Promise((resolve, reject) => {
@@ -32,7 +32,7 @@ exports.listPrices = function(req, res){
             .then(data => {
             resolve(data);
             })
-            .catch(err => reject('failed'))
+            .catch(err => reject('Lopez de haro failed: ' + err))
         });
     
     const bancoBdiPrices =  new Promise((resolve, reject) => {
@@ -40,7 +40,7 @@ exports.listPrices = function(req, res){
             .then(data => {
             resolve(data);
             })
-            .catch(err => reject('failed'))
+            .catch(err => reject('banco bdi failed: ' + err))
         });    
 
     const banescoPrices =  new Promise((resolve, reject) => {
@@ -48,7 +48,7 @@ exports.listPrices = function(req, res){
             .then(data => {
             resolve(data);
             })
-            .catch(err => reject('failed'))
+            .catch(err => reject('banesco failed: ' + err))
         });  
 
     Promise.all([asociacionAhorros, bancoCaribe, bancoPromerica, lopezDeHaroPrices, bancoBdiPrices, banescoPrices]).then(data => {
