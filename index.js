@@ -1,8 +1,11 @@
 const express = require('express')
 const app = express()
+const flatCache = require('flat-cache')
 const port = process.env.PORT || 3000
 
 const routes = require('./routes/pricesRoutes');
 routes.routes(app);
+
+
 
 app.listen(port, () => console.log(`listening on port ${port}!`))
