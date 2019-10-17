@@ -3,8 +3,10 @@
 const scraper = require('../utils/scraper');
 
 exports.listPrices = function(req, res){
+
+    //scraper.initNavigation();
    const asociacionAhorros = new Promise((resolve, reject) => {
-    scraper.getAsociacionAhorrosPrices()
+    scraper.initNavigation()
        .then(data => {
          resolve(data);
        })
@@ -51,7 +53,15 @@ exports.listPrices = function(req, res){
             .catch(err => reject('banesco failed: ' + err))
         });  
 
-    Promise.all([asociacionAhorros, bancoCaribe, bancoPromerica, lopezDeHaroPrices, bancoBdiPrices, banescoPrices]).then(data => {
+    const caribePrices =  new Promise((resolve, reject) => {
+        scraper.getCaribeExpressPrices()
+            .then(data => {
+            resolve(data);
+            })
+            .catch(err => reject('caribe express failed: ' + err))
+        });  
+
+    Promise.all([asociacionAhorros, bancoCaribe, bancoPromerica, lopezDeHaroPrices, bancoBdiPrices, banescoPrices, caribePrices]).then(data => {
         res.send(data);
     }).catch(err => res.status(500).send(err))
 }

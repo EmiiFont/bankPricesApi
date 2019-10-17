@@ -5,6 +5,7 @@ class BankPrice {
       this.dollarSell = dollarSell;
       this.euroBuy = euroBuy;
       this.euroSell = euroSell;
+      this.date = new Date();
     }
   };
 

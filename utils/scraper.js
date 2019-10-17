@@ -3,20 +3,35 @@
 const puppeteer = require('puppeteer');
 const BankPrice = require('../models/bankprice');
 
-const getAsociacionAhorrosPrices = async () =>{
+const initNavigation = async (url) => {
+        const browser = await puppeteer.launch();
+        
+        const page = await browser.newPage();
+    await page.setViewport({ width: 1920, height: 937 });
+        
+       let ahorros = await getAsociacionAhorrosPrices(page);
+       let bdi = await getBancoBdiPrices(page);
+       let bCaribe = await getBancoCaribePrices(page);
+       let banesco = await getBanescoPrices(page);
+       let promerica = await getPromericaPrices(page);
+       let lopezDeHaro = await getLopezDeHaroPrices(page);
+       let caribeExpress = await getCaribeExpressPrices(page);
+
+    await browser.close();
+
+    return [ahorros, bdi, bCaribe, banesco, promerica, lopezDeHaro, caribeExpress];
+}
+
+const getAsociacionAhorrosPrices = async (page) =>{
+   
     let prices = new BankPrice();//{'name': 'asociacion de ahorros y prestamos','dollarBuy': 0, 'dollarSell': 0, 'euroBuy': 0, 'dollarSell': 0};
+    
     prices.name = 'asociacion de ahorros y prestamos';
 
     try{
 
-        const browser = await puppeteer.launch();
-        
-        const page = await browser.newPage();
-       
-        await page.goto('https://www.apap.com.do/calculadoras/')
-  
-        await page.setViewport({ width: 1920, height: 937 })
-        
+        await page.goto('https://www.apap.com.do/calculadoras/');
+
         for(let i = 1; i<= 2; i++){
             
             await page.waitForSelector('#navbarNav #currency-label')
@@ -43,7 +58,6 @@ const getAsociacionAhorrosPrices = async () =>{
                 prices.euroSell = sellPrice;
             }
         }
-        await browser.close();
     }catch(error){
         console.log(error);
     }
@@ -51,14 +65,9 @@ const getAsociacionAhorrosPrices = async () =>{
 return prices;
 }
 
-const getBancoCaribePrices = async () =>{
-    const browser = await puppeteer.launch();
-    
-    const page = await browser.newPage();
+const getBancoCaribePrices = async (page) =>{
     
     await page.goto('https://www.bancocaribe.com.do/divisas');
-    
-    await page.setViewport({ width: 1920, height: 937 });
     
     await page.waitForSelector('.col > .d-inline-flex > .site_exchange-rates > #exchange-rates-button > span');
     await page.click('.col > .d-inline-flex > .site_exchange-rates > #exchange-rates-button > span');
@@ -76,20 +85,15 @@ const getBancoCaribePrices = async () =>{
     const euroBuyPrice = await page.evaluate(element => element.textContent, buyEuroElement);
     const euroSellPrice = await page.evaluate(element => element.textContent, sellEuroElement);
     
-    await browser.close();
-
     const prices = new BankPrice('banco caribe', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
     return prices;
 }
 
-const getPromericaPrices = async () => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+const getPromericaPrices = async (page) => {
 
     await page.goto('https://www.promerica.com.do/');
 
-    await page.setViewport({ width: 1920, height: 937 });
 
     await page.waitForSelector('.row > #tipoCambioHome > .col-sm-6 > nav > .tipoEuro');
 
@@ -111,18 +115,13 @@ const getPromericaPrices = async () => {
 
     const prices = new BankPrice('banco promerica', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
-    await browser.close();
-
     return prices;
 }
 
-const getLopezDeHaroPrices = async () => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+const getLopezDeHaroPrices = async (page) => {
     
     await page.goto('https://www.blh.com.do/');
     
-    await page.setViewport({ width: 1920, height: 937 });
     
     await page.waitForSelector('.instance-5 > .vc_column-inner > .wpb_wrapper > .iwithtext > .iwt-text > p');
    
@@ -138,19 +137,12 @@ const getLopezDeHaroPrices = async () => {
 
     const prices = new BankPrice('banco lopez de haro', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
-    await browser.close();
-
     return prices;
 }
 
-const getBancoBdiPrices = async () => {
-  const browser = await puppeteer.launch();
-  
-  const page = await browser.newPage();
-  
+const getBancoBdiPrices = async (page) => {
   await page.goto('https://www.bdi.com.do/');
   
-  await page.setViewport({ width: 1920, height: 937 });
   
   const replaceBuy = "Compra";
   const replaceSell = "Venta";
@@ -179,35 +171,46 @@ const getBancoBdiPrices = async () => {
 
   const prices = new BankPrice('banco bdi', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
-  await browser.close();
-
   return prices;
 }
 
-const getBanescoPrices = async () => {
-    const browser = await puppeteer.launch()
-  const page = await browser.newPage()
+const getBanescoPrices = async (page) => {
+  await page.goto('https://www.banesco.com.do/');
   
-  await page.goto('https://www.banesco.com.do/')
   
-  await page.setViewport({ width: 1920, height: 182 })
-  
-  await page.waitForSelector('.views-element-container > .view-home-tasa-de-cambio > .view-content > .views-row > p:nth-child(3)')
+  await page.waitForSelector('.views-element-container > .view-home-tasa-de-cambio > .view-content > .views-row > p:nth-child(3)');
   
   const pricesElement = await page.$('.views-element-container > .view-home-tasa-de-cambio > .view-content > .views-row > p:nth-child(3)');
     
   const textBuy = await page.evaluate(element => element.textContent, pricesElement);
   
-  const buyPrice = textBuy.substring(12, 17);
-  const sellPrice = textBuy.substring(24, 29)
-  const euroBuyPrice = textBuy.substring(41, 46);
-  const euroSellPrice = textBuy.substring(52, 57);
+  const buyPrice = textBuy.substring(11, 17).trim();
+  const sellPrice = textBuy.substring(23, 29).trim();
+  const euroBuyPrice = textBuy.substring(40, 46).trim();
+  const euroSellPrice = textBuy.substring(51, 56).trim();
 
   const prices = new BankPrice('banesco', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
-  await browser.close();
-
   return prices;
+}
+
+const getCaribeExpressPrices = async (page) =>{
+    
+    await page.goto('https://caribeexpress.com.do/');
+    
+    await page.setViewport({ width: 1920, height: 937 });
+           
+    await page.waitForSelector('#content-wrapper > .container > .plan:nth-child(3) > .plan-price > .value');
+    
+    let dollarBuyElement = await page.$('#content-wrapper > .container > .plan:nth-child(3) > .plan-price > .value');
+    let euroBuyElement = await page.$('#content-wrapper > .container > .plan:nth-child(4) > .plan-price > .value');
+    
+    const dollarBuyPrice = await page.evaluate(element => element.textContent, dollarBuyElement);
+    const euroBuyPrice = await page.evaluate(element => element.textContent, euroBuyElement);
+    
+    const prices = new BankPrice('caribe express', dollarBuyPrice.trim(), 0, euroBuyPrice.trim(), 0);
+
+    return prices;
 }
 
 module.exports.getAsociacionAhorrosPrices = getAsociacionAhorrosPrices;
@@ -216,3 +219,5 @@ module.exports.getBancoCaribePrices = getBancoCaribePrices;
 module.exports.getLopezDeHaroPrices = getLopezDeHaroPrices;
 module.exports.getBancoBdiPrices = getBancoBdiPrices;
 module.exports.getBanescoPrices = getBanescoPrices;
+module.exports.getCaribeExpressPrices = getCaribeExpressPrices;
+module.exports.initNavigation = initNavigation;
