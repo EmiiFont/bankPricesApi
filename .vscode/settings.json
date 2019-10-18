@@ -1,0 +1,5 @@
+{
+    "appService.showBuildDuringDeployPrompt": false,
+    "appService.defaultWebAppToDeploy": "/subscriptions/f482ad08-6c50-431f-bf25-c08a5d294a31/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/bankpricesapi",
+    "appService.deploySubpath": ""
+}
