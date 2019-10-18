@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "firebase-admin": "^8.6.1",
     "flat-cache": "^2.0.1",
     "memory-cache": "^0.2.0",
     "node-cron": "^2.0.3",

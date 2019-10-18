@@ -30,7 +30,6 @@ const getAsociacionAhorrosPrices = async (browser) =>{
         await page.setViewport({ width: 1920, height: 937 });
 
         await page.goto('https://www.apap.com.do/calculadoras/');
-        console.log('a');
 
         for(let i = 1; i<= 2; i++){
             
