@@ -2,9 +2,15 @@
 
 const scraper = require('../utils/scraper');
 const bankService = require('../services/bankPricesService');
+const infoScraper = require('../utils/infoScraper');
+const bankNames = require('../utils/bankNames');
 
 exports.listPrices = function(req, res){
 
+    //infoScraper.getBancoPopularInf();
+    //bankService.retrieveBucketfiles();
+     bankService.addBankNames(bankNames.bankNames)
+    
     //scraper.initNavigation();
    const asociacionAhorros = new Promise((resolve, reject) => {
     scraper.initNavigation()
