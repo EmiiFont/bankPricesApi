@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const admin = require('firebase-admin');
 const serviceAccount = require('../bankpricesstore-firebase-cred.json');
 
@@ -26,30 +27,40 @@ const addBankPrices = (bankPricesArr) => {
 }
 
 
-const addBankNames = (bankNames) => {
-    for(let bank of bankNames){
+const addBank = async (bank) => {
         db.collection('banks').doc(bank.name).set(JSON.parse(JSON.stringify(bank))).then(writeResult =>{
-            console.log("added bank " + bank.name);
+            console.log("added bank " + bank);
         })
-    }
+}
+
+const uploadFile = async (filePath, bank) => {
+    bucket.upload(filePath).then(data => {
+        let file = data[0];
+         //console.log(file);
+        bank.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/bankpricesstore.appspot.com/o/' 
+        + file.name + "?alt=media&token=" + file.metadata.firebaseStorageDownloadTokens;
+
+        // addBank(bank)
+    });
 }
 
 ///retrieve download url of the images in the bucket
-const retrieveBucketfiles = () =>{
-    const img_url = 'https://firebasestorage.googleapis.com/v0/b/bankpricesstore.appspot.com/o/'
-    bucket.getFiles().then(c => {
-        c[0].forEach((value, id)=>{
-           value.getMetadata().then(b => {
-             console.log(img_url + b[0].name + "?alt=media&token=" + b[0].metadata.firebaseStorageDownloadTokens);
-            // console.log(b[0].mediaLink + "&token=" + b[0].metadata.firebaseStorageDownloadTokens);
-           });
-            
-        })
-            
-    })
+const retrievePublicUrl = async () => {
+    const config = {
+        action: 'read',
+        expires: '01-01-2500',
+      };
+    let files = await bucket.getFiles();
+    let images = await Promise.all(files[0].map( async (file) =>{
+               let url = await file.getSignedUrl(config);
+               return {name: path.basename(file.name, path.extname(file.name)), url: url[0]};
+             }));
+       
+    return images;
 }
 
 module.exports.addBankPrices = addBankPrices;
 module.exports.addPrice = addPrice;
-module.exports.retrieveBucketfiles = retrieveBucketfiles;
-module.exports.addBankNames = addBankNames;
+module.exports.retrievePublicUrl = retrievePublicUrl;
+module.exports.addBank = addBank;
+module.exports.uploadFile = uploadFile;

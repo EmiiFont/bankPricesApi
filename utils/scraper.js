@@ -265,7 +265,7 @@ const getBanReservasPrices = async(browser) => {
   const euroBuyPrice = await page.evaluate(element => element.textContent, euroBuyElement);
   const euroSellPrice = await page.evaluate(element => element.textContent, euroSellElement);
   
-  const prices = new BankPrice('banReservas', dollarBuyPrice.trim(), dollarSellPrice.trim(), euroBuyPrice.trim(), euroSellPrice.trim());
+  const prices = new BankPrice('banreservas', dollarBuyPrice.trim(), dollarSellPrice.trim(), euroBuyPrice.trim(), euroSellPrice.trim());
 
   return prices;
 }
