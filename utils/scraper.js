@@ -3,6 +3,7 @@
 const puppeteer = require('puppeteer');
 const BankPrice = require('../models/bankprice');
 const bankNames = require('../utils/bankNames');
+const puppeteerPageConfig =  {waitUntil: 'load', timeout: 0};
 
 const initNavigation = async () => {
     const browser = await puppeteer.launch();
@@ -13,10 +14,14 @@ const initNavigation = async () => {
         getBhdLeonPrices(browser),
         getScotiaBankPrices(browser),
         getBancoActivoPrices(browser),
-        getBancoBdiPrices(browser), getBancoCaribePrices(browser),
-        getBanescoPrices(browser), getPromericaPrices(browser), 
+        getBancoBdiPrices(browser), 
+        getBancoCaribePrices(browser),
+        getBanescoPrices(browser), 
+        getPromericaPrices(browser), 
         getLopezDeHaroPrices(browser),
         getCaribeExpressPrices(browser),
+        getAcnPrices(browser),
+        getQuezadaPrices(browser),
         getBancoVimencaPrices(browser),
         getBancoLafise(browser),
         getBancamericaPrices(browser),
@@ -42,7 +47,7 @@ const getAsociacionAhorrosPrices = async (browser) =>{
 
         await page.setViewport({ width: 1920, height: 937 });
 
-        await page.goto('https://www.apap.com.do/calculadoras/');
+        await page.goto('https://www.apap.com.do/calculadoras/', puppeteerPageConfig);
 
         for(let i = 1; i<= 2; i++){
             
@@ -73,7 +78,7 @@ const getAsociacionAhorrosPrices = async (browser) =>{
     }catch(error){
         console.log(error);
     }
-     
+    console.log(prices);
 return prices;
 }
 
@@ -82,7 +87,7 @@ const getBancoCaribePrices = async (browser) =>{
     const page = await browser.newPage();
 
     await page.setViewport({ width: 1920, height: 937 });
-    await page.goto('https://www.bancocaribe.com.do/divisas');
+    await page.goto('https://www.bancocaribe.com.do/divisas', puppeteerPageConfig);
     
     await page.waitForSelector('.col > .d-inline-flex > .site_exchange-rates > #exchange-rates-button > span');
     await page.click('.col > .d-inline-flex > .site_exchange-rates > #exchange-rates-button > span');
@@ -101,7 +106,7 @@ const getBancoCaribePrices = async (browser) =>{
     const euroSellPrice = await page.evaluate(element => element.textContent, sellEuroElement);
     
     const prices = new BankPrice('caribe', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
-
+    console.log(prices);
     return prices;
 }
 
@@ -110,7 +115,7 @@ const getPromericaPrices = async (browser) => {
     const page = await browser.newPage();
 
     await page.setViewport({ width: 1920, height: 937 });
-    await page.goto('https://www.promerica.com.do/');
+    await page.goto('https://www.promerica.com.do/', puppeteerPageConfig);
 
 
     await page.waitForSelector('.row > #tipoCambioHome > .col-sm-6 > nav > .tipoEuro');
@@ -133,6 +138,7 @@ const getPromericaPrices = async (browser) => {
 
     const prices = new BankPrice('promerica', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
+    console.log(prices);
     return prices;
 }
 
@@ -142,7 +148,7 @@ const getLopezDeHaroPrices = async (browser) => {
 
     await page.setViewport({ width: 1920, height: 937 });
     
-    await page.goto('https://www.blh.com.do/');
+    await page.goto('https://www.blh.com.do/', puppeteerPageConfig);
 
     await page.waitForSelector('.instance-5 > .vc_column-inner > .wpb_wrapper > .iwithtext > .iwt-text > p');
    
@@ -158,6 +164,7 @@ const getLopezDeHaroPrices = async (browser) => {
 
     const prices = new BankPrice('lopezDeHaro', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
+    console.log(prices);
     return prices;
 }
 
@@ -165,7 +172,7 @@ const getBancoBdiPrices = async (browser) => {
  const page = await browser.newPage();
 
  await page.setViewport({ width: 1920, height: 937 });
- await page.goto('https://www.bdi.com.do/');
+ await page.goto('https://www.bdi.com.do/', puppeteerPageConfig);
   
   
   const replaceBuy = "Compra";
@@ -195,6 +202,7 @@ const getBancoBdiPrices = async (browser) => {
 
   const prices = new BankPrice('bdi', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
+  console.log(prices);
   return prices;
 }
 
@@ -203,7 +211,7 @@ const getBanescoPrices = async (browser) => {
 
     await page.setViewport({ width: 1920, height: 937 });
 
-    await page.goto('https://www.banesco.com.do/');
+    await page.goto('https://www.banesco.com.do/', puppeteerPageConfig);
   
   
   await page.waitForSelector('.views-element-container > .view-home-tasa-de-cambio > .view-content > .views-row > p:nth-child(3)');
@@ -219,6 +227,7 @@ const getBanescoPrices = async (browser) => {
 
   const prices = new BankPrice('banesco', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
+  console.log(prices);
   return prices;
 }
 
@@ -227,7 +236,7 @@ const getCaribeExpressPrices = async (browser) =>{
 
     await page.setViewport({ width: 1920, height: 937 });
 
-    await page.goto('https://caribeexpress.com.do/');
+    await page.goto('https://caribeexpress.com.do/', puppeteerPageConfig);
     
     await page.setViewport({ width: 1920, height: 937 });
            
@@ -241,13 +250,14 @@ const getCaribeExpressPrices = async (browser) =>{
     
     const prices = new BankPrice('caribeExpress', dollarBuyPrice.trim(), 0, euroBuyPrice.trim(), 0);
 
+    console.log(prices);
     return prices;
 }
 
 const getBanReservasPrices = async(browser) => {
   const page = await browser.newPage();
 
-  await page.goto('https://www.banreservas.com/');
+  await page.goto('https://www.banreservas.com/', puppeteerPageConfig);
   
   await page.setViewport({ width: 1920, height: 888 });
   
@@ -267,13 +277,14 @@ const getBanReservasPrices = async(browser) => {
   
   const prices = new BankPrice('banreservas', dollarBuyPrice.trim(), dollarSellPrice.trim(), euroBuyPrice.trim(), euroSellPrice.trim());
 
+  console.log(prices);
   return prices;
 }
 
 const getBancoPopularPrices = async(browser) => {
   const page = await browser.newPage();
 
-  await page.goto('https://www.popularenlinea.com/personas/Paginas/Home.aspx');
+  await page.goto('https://www.popularenlinea.com/personas/Paginas/Home.aspx', puppeteerPageConfig);
   
   await page.setViewport({ width: 1920, height: 888 });
   
@@ -296,6 +307,7 @@ const getBancoPopularPrices = async(browser) => {
 
   const prices = new BankPrice('popular', dollarBuyPrice.trim(), dollarSellPrice.trim(), euroBuyPrice.trim(), euroSellPrice.trim());
 
+  console.log(prices);
   return prices;
 
 }
@@ -304,7 +316,7 @@ const getBancoPopularPrices = async(browser) => {
 const getBhdLeonPrices = async(browser) => {
     const page = await browser.newPage();
   
-    await page.goto('https://www.bhdleon.com.do')
+    await page.goto('https://www.bhdleon.com.do', puppeteerPageConfig)
   
     await page.setViewport({ width: 1920, height: 888 })
     
@@ -326,13 +338,14 @@ const getBhdLeonPrices = async(browser) => {
    
     const prices = new BankPrice('bhdleon', dollarBuyPrice.replace("DOP", "").trim(), dollarSellPrice.replace("DOP", "").trim(), euroBuyPrice.replace("DOP", "").trim(), euroSellPrice.replace("DOP", "").trim());
   
+    console.log(prices);
     return prices;
   
   }
 const getScotiaBankPrices = async (browser) => {
     const page = await browser.newPage();
 
-  await page.goto('https://do.scotiabank.com/banca-personal/tarifas/tasas-de-cambio.html')
+  await page.goto('https://do.scotiabank.com/banca-personal/tarifas/tasas-de-cambio.html', puppeteerPageConfig)
   
   await page.setViewport({ width: 1920, height: 888 })
   
@@ -357,13 +370,14 @@ const getScotiaBankPrices = async (browser) => {
 
   const prices = new BankPrice('scotiaBank', dollarBuyPrice.trim(), dollarSellPrice.trim(), eurBuyCal, eurSellCal);
 
+  console.log(prices);
   return prices;
 }
 
 const getBancoActivoPrices = async (browser) =>{
   const page = await browser.newPage();
 
-  await page.goto('https://www.bancoactivo.com.do/tasas-tarifas.html')
+  await page.goto('https://www.bancoactivo.com.do/tasas-tarifas.html', puppeteerPageConfig)
   
   await page.setViewport({ width: 1920, height: 888 })
   
@@ -382,6 +396,7 @@ const getBancoActivoPrices = async (browser) =>{
   
   const prices = new BankPrice('activo', dollarBuyPrice.trim(), dollarSellPrice.trim(), euroBuyPrice.trim(), euroSellPrice.trim());
 
+  console.log(prices);
   return prices;
 }
 
@@ -389,7 +404,7 @@ const getBancoSantaCruzPrices = async(browser) => {
     
     const page = await browser.newPage();
 
-    await page.goto('https://www.bsc.com.do/dynresources/wj/bsc/v1/divisas');
+    await page.goto('https://www.bsc.com.do/dynresources/wj/bsc/v1/divisas', puppeteerPageConfig);
   
     await page.setViewport({ width: 1920, height: 888 });
 
@@ -404,15 +419,16 @@ const getBancoSantaCruzPrices = async(browser) => {
     const cad = parsedJson.cad;
    
     
-    const prices = new BankPrice('santaCruz', usd.precio_compra, usd.precio_venta, eur.precio_compra, eur.precio_venta, gbp.precio_compra, gbp.precio_venta, cad.precio_compra, cad.precio_venta);
+   const prices = new BankPrice('santaCruz', usd.precio_compra, usd.precio_venta, eur.precio_compra, eur.precio_venta, gbp.precio_compra, gbp.precio_venta, cad.precio_compra, cad.precio_venta);
     
+    console.log(prices);
   return prices;
 }
 
 const getBancoVimencaPrices = async(browser) => {
     const page = await browser.newPage();
   
-  await page.goto('https://www.bancovimenca.com/');
+  await page.goto('https://www.bancovimenca.com/', puppeteerPageConfig);
   
   await page.setViewport({ width: 1920, height: 888 });
   
@@ -434,13 +450,14 @@ const getBancoVimencaPrices = async(browser) => {
   
   const prices = new BankPrice('vimenca', dollarBuyPrice.trim(), dollarSellPrice.trim(), euroBuyPrice.trim(), euroSellPrice.trim());
   
+  console.log(prices);
   return prices;
 }
 
 const getBancamericaPrices = async(browser) => {
     const page = await browser.newPage();
   
-  await page.goto('https://www.bancamerica.com.do/');
+  await page.goto('https://www.bancamerica.com.do/', puppeteerPageConfig);
   
   await page.setViewport({ width: 1920, height: 888 });
   
@@ -462,13 +479,14 @@ const euroSellPrice = await page.evaluate(element => element.textContent, euroSe
   
   const prices = new BankPrice('bancamerica', dollarBuyPrice.replace("RD$", "").trim(), dollarSellPrice.replace("RD$", "").trim(), euroBuyPrice.replace("RD$", "").trim(), euroSellPrice.replace("RD$", "").trim());
 
+  console.log(prices);
   return prices;
 }
  
 const getBancoLafise = async(browser) => {
     const page = await browser.newPage();
   
-  await page.goto('https://www.lafise.com/blrd');
+  await page.goto('https://www.lafise.com/blrd', puppeteerPageConfig);
   
   await page.setViewport({ width: 1920, height: 888 });
   
@@ -490,6 +508,7 @@ const getBancoLafise = async(browser) => {
   
   const prices = new BankPrice('lafise', dollarBuyPrice.replace("DOP:", "").trim(), dollarSellPrice.replace("USD:", "").trim(), euroBuyPrice.replace("DOP:", "").trim(), euroSellPrice.replace("EUR:", "").trim());
   
+  console.log(prices);
   return prices;
 }
 
@@ -497,7 +516,7 @@ const getAsociacionNacionalPrices = async(browser) => {
 
     const page = await browser.newPage();
   
-    await page.goto('https://www.alnap.com.do/');
+    await page.goto('https://www.alnap.com.do/', puppeteerPageConfig);
     
     await page.setViewport({ width: 1920, height: 888 });
     
@@ -510,7 +529,61 @@ const getAsociacionNacionalPrices = async(browser) => {
 
     const prices = new BankPrice('asociacionNacional', dollarBuyPrice.trim(), dollarSellPrice.trim(), 0, 0);
 
+    console.log(prices);
     return prices;
+}
+
+const getAcnPrices = async(browser) => {
+
+  const page = await browser.newPage()
+  
+  await page.goto('https://acn.com.do/', puppeteerPageConfig)
+  
+  await page.setViewport({ width: 1920, height: 937 })
+  
+  await page.waitForSelector('.premium:nth-child(2) > .plan-features > ul > li:nth-child(1) > h4')
+  const dollaBuyElement = await page.$('.premium:nth-child(2) > .plan-features > ul > li:nth-child(1) > h4');
+  
+  const euroBuyElement = await page.$('.premium:nth-child(3) > .plan-features > ul > li:nth-child(1) > h4');
+  
+  const gbpBuyElement =  await page.$('.premium:nth-child(3) > .plan-features > ul > li:nth-child(1) > h4');
+  
+  const chfBuyElement =  await page.$('.featured:nth-child(4) > .plan-features > ul > li:nth-child(1) > h4');
+  
+  const cadBuyElement = await page.$('.featured:nth-child(2) > .plan-features > ul > li:nth-child(1) > h4');
+
+  const dollarBuyPrice =  await page.evaluate(element => element.textContent.substring(1,6), dollaBuyElement);
+  const euroBuyPrice =  await page.evaluate(element => element.textContent.substring(1,6), euroBuyElement);
+  const gbpBuyPrice =  await page.evaluate(element => element.textContent.substring(1,6), gbpBuyElement);
+  const chfBuyPrice =  await page.evaluate(element => element.textContent.substring(1,6), chfBuyElement);
+  const cadBuyPrice =  await page.evaluate(element => element.textContent.substring(1,6), cadBuyElement);
+
+  const prices = new BankPrice('acn', dollarBuyPrice, 0, euroBuyPrice, 0, gbpBuyPrice, 0, cadBuyPrice, 0);
+  
+  console.log(prices);
+  return prices;
+}
+
+const getQuezadaPrices = async(browser) => {
+  const page = await browser.newPage();
+  
+  await page.goto('http://agentedecambioquezada.com/', puppeteerPageConfig)
+  
+  await page.setViewport({ width: 1920, height: 937 })
+  
+  await page.waitForSelector('.row > .twelve > .blog-content-wrapper > .blog-content > p:nth-child(1)');
+  const dollarElement = await page.$('.row > .twelve > .blog-content-wrapper > .blog-content > p:nth-child(1)');
+  const euroElement = await page.$('.row > .twelve > .blog-content-wrapper > .blog-content > p:nth-child(2)');
+
+  const dollarBuyPrice =  await page.evaluate(element => element.textContent.substring(13, 18), dollarElement);
+  const euroBuyPrice =  await page.evaluate(element => element.textContent.substring(13, 18), euroElement);
+  const dollarSellPrice =  await page.evaluate(element => element.textContent.substring(26, 32), euroElement);
+  const euroSellPrice =  await page.evaluate(element => element.textContent.substring(26, 32), euroElement);
+
+  const prices = new BankPrice('quezada', dollarBuyPrice,dollarSellPrice, euroBuyPrice, euroSellPrice, 0, 0, 0, 0);
+
+  console.log(prices);
+  return prices;
 }
 
 

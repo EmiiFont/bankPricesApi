@@ -12,44 +12,64 @@ admin.initializeApp({
 const db = admin.firestore();
 const bucket = admin.storage().bucket('gs://bankpricesstore.appspot.com');
 
+const config = {
+    action: 'read',
+    expires: '01-01-2500',
+  };
+
 const addPrice = (bankPrice) => {
     db.collection(bankPrice.name).doc(bankPrice.date).set(bankPrice).then((vl)=>{
       console.log(vl);
     });
 }
 
-const addBankPrices = (bankPricesArr) => {
+const addBankPrices = async(bankPricesArr) => {
     for(let bank of bankPricesArr){
-        db.collection('banks').doc(bank.name).update(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
+        
+        let docRef = db.collection('banks').doc(bank.name);
+        let docData = await docRef.get();
+        let document = docData.data();
+        
+        if(document.dollarBuy != undefined){
+           bank.increasedDollarBuy = bank.dollarBuy > document.dollarBuy;
+           bank.decreasedDollarBuy = bank.dollarBuy < document.dollarBuy;
+        }
+        if(document.dollarSell != undefined){
+            bank.increasedDollarSell = bank.dollarSell > document.dollarSell;
+            bank.decreasedDollarSell = bank.dollarSell < document.dollarSell;
+        }
+        if(document.euroBuy != undefined){
+            bank.increasedEuroBuy = bank.euroBuy > document.euroBuy;
+            bank.decreasedEuroBuy = bank.euroBuy < document.euroBuy;
+        }
+        if(document.euroSell != undefined){
+            bank.increasedEuroSell = bank.euroSell > document.euroSell;
+            bank.decreasedEuroSell = bank.euroSell < document.euroSell;
+        }
+        docRef.collection('prices').doc(JSON.parse(JSON.stringify(bank.date))).set(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
             console.log(writeResult);
-          });
+        });
+        docRef.update(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
+            console.log(writeResult);
+        });
     }
 }
 
-
 const addBank = async (bank) => {
-        db.collection('banks').doc(bank.name).set(JSON.parse(JSON.stringify(bank))).then(writeResult =>{
+        db.collection('banks').doc(bank.name).update(JSON.parse(JSON.stringify(bank))).then(writeResult =>{
             console.log("added bank " + bank);
         })
 }
 
 const uploadFile = async (filePath, bank) => {
-    bucket.upload(filePath).then(data => {
-        let file = data[0];
-         //console.log(file);
-        bank.imageUrl = 'https://firebasestorage.googleapis.com/v0/b/bankpricesstore.appspot.com/o/' 
-        + file.name + "?alt=media&token=" + file.metadata.firebaseStorageDownloadTokens;
-
-        // addBank(bank)
-    });
+    let file = await bucket.upload(filePath);
+    let url = file.getSignedUrl(config);
+    
+    return url;
 }
 
 ///retrieve download url of the images in the bucket
 const retrievePublicUrl = async () => {
-    const config = {
-        action: 'read',
-        expires: '01-01-2500',
-      };
     let files = await bucket.getFiles();
     let images = await Promise.all(files[0].map( async (file) =>{
                let url = await file.getSignedUrl(config);
