@@ -31,21 +31,18 @@ const addBankPrices = async(bankPricesArr) => {
         let document = docData.data();
         
         if(document.dollarBuy != undefined){
-           bank.increasedDollarBuy = bank.dollarBuy > document.dollarBuy;
-           bank.decreasedDollarBuy = bank.dollarBuy < document.dollarBuy;
+           bank.USBuyChange = getTypeOfChange(bank, document, 'dollarBuy');
         }
         if(document.dollarSell != undefined){
-            bank.increasedDollarSell = bank.dollarSell > document.dollarSell;
-            bank.decreasedDollarSell = bank.dollarSell < document.dollarSell;
+            bank.USSellChange = getTypeOfChange(bank, document, 'dollarSell');
         }
         if(document.euroBuy != undefined){
-            bank.increasedEuroBuy = bank.euroBuy > document.euroBuy;
-            bank.decreasedEuroBuy = bank.euroBuy < document.euroBuy;
+            bank.EUBuyChange = getTypeOfChange(bank, document, 'euroBuy');
         }
         if(document.euroSell != undefined){
-            bank.increasedEuroSell = bank.euroSell > document.euroSell;
-            bank.decreasedEuroSell = bank.euroSell < document.euroSell;
+            bank.EUSellChange = getTypeOfChange(bank, document, 'euroSell');
         }
+
         docRef.collection('prices').doc(JSON.parse(JSON.stringify(bank.date))).set(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
             console.log(writeResult);
         });
@@ -53,6 +50,10 @@ const addBankPrices = async(bankPricesArr) => {
             console.log(writeResult);
         });
     }
+}
+
+const getTypeOfChange = (newObj, oldObj, property) =>{
+    return newObj[property] > oldObj[property] ? 'Increase' : newObj[property] == oldObj[property] ? 'Equal' : 'Decrease';
 }
 
 const addBank = async (bank) => {

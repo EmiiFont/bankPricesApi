@@ -6,7 +6,7 @@ const bankNames = require('../utils/bankNames');
 const puppeteerPageConfig =  {waitUntil: 'load', timeout: 0};
 
 const initNavigation = async () => {
-    const browser = await puppeteer.launch();
+   const browser = await puppeteer.launch();
         
    let allPrices = await Promise.all([
         getBanReservasPrices(browser),
@@ -586,15 +586,32 @@ const getQuezadaPrices = async(browser) => {
   return prices;
 }
 
+const getPeraviaPrices = async(browser) => {
 
-const getTextContentForPrices = async (page, dBuy, dSell, eBuy, eSell) => {
-    const dollarBuyPrice = await page.evaluate(element => element.textContent, dBuy);
-    const dollarSellPrice = await page.evaluate(element => element.textContent, dSell);
+  const page = await browser.newPage();
   
-    const euroBuyPrice = await page.evaluate(element => element.textContent, eBuy);
-    const euroSellPrice = await page.evaluate(element => element.textContent, eSell);
+  await page.goto('https://asociacionperavia.com.do/', puppeteerPageConfig);
+  
+  await page.setViewport({ width: 1920, height: 937 });
 
-    return {dollarBuyPrice, dollarSellPrice, euroBuyPrice, euroSellPrice}
+  await page.waitForSelector('.row > .col-sm-8 > .tasas > .compra:nth-child(2) > strong');
+  const buyElement = await page.$('.row > .col-sm-8 > .tasas > .compra:nth-child(2) > strong');
+  
+  const sellElement = await page.$('.row > .col-sm-8 > .tasas > .compra:nth-child(3) > strong');
+
+  const dollarBuyPrice = await getTextContentForPrices(page, buyElement);
+  const dollarSellPrice = await getTextContentForPrices(page, sellElement);
+  
+  const prices = new BankPrice('peravia', dollarBuyPrice.replace("RD$", "").trim(), dollarSellPrice.replace("RD$", "").trim(), 0, 0, 0, 0, 0, 0);
+
+  return prices;
+}
+
+
+
+const getTextContentForPrices = async (page, priceElement) => {
+    const price = await page.evaluate(element => element.textContent, priceElement);
+    return price;
 }
 
 module.exports.initNavigation = initNavigation;
