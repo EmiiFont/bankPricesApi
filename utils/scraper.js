@@ -2,7 +2,6 @@
 
 const puppeteer = require('puppeteer');
 const BankPrice = require('../models/bankprice');
-const bankNames = require('../utils/bankNames');
 const puppeteerPageConfig =  {waitUntil: 'load', timeout: 0};
 
 const initNavigation = async () => {
@@ -27,7 +26,8 @@ const initNavigation = async () => {
         getBancamericaPrices(browser),
         getBancoSantaCruzPrices(browser),
         getAsociacionAhorrosPrices(browser),
-        getAsociacionNacionalPrices(browser)
+        getAsociacionNacionalPrices(browser),
+        getPeraviaPrices(browser)
     ]);
 
     await browser.close();
@@ -464,11 +464,9 @@ const getBancamericaPrices = async(browser) => {
   await page.waitForSelector('.contenedor > .cuadro > .list-inline > li:nth-child(1) > strong:nth-child(4)');
  
  const dollarBuyElement =  await page.$('.contenedor > .cuadro > .list-inline > li:nth-child(1) > strong:nth-child(4)');
+ const dollarSellElement = await page.$('.contenedor > .cuadro > .list-inline > li:nth-child(1) > strong:nth-child(8)');
   
- const dollarSellElement =  await page.$('.contenedor > .cuadro > .list-inline > li:nth-child(2) > strong:nth-child(4)');
-  
- const euroBuyElement = await page.$('.contenedor > .cuadro > .list-inline > li:nth-child(1) > strong:nth-child(8)');
-  
+ const euroBuyElement =  await page.$('.contenedor > .cuadro > .list-inline > li:nth-child(2) > strong:nth-child(4)');
  const euroSellElement = await page.$('.contenedor > .cuadro > .list-inline > li:nth-child(2) > strong:nth-child(8)');
   
  const dollarBuyPrice = await page.evaluate(element => element.textContent, dollarBuyElement);

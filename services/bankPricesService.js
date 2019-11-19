@@ -57,8 +57,8 @@ const getTypeOfChange = (newObj, oldObj, property) =>{
 }
 
 const addBank = async (bank) => {
-        db.collection('banks').doc(bank.name).update(JSON.parse(JSON.stringify(bank))).then(writeResult =>{
-            console.log("added bank " + bank);
+        db.collection('banks').doc(bank.name).set(JSON.parse(JSON.stringify(bank)), { merge: true }).then(writeResult =>{
+            console.log("added bank " + bank.name);
         })
 }
 
