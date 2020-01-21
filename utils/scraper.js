@@ -222,8 +222,8 @@ const getBanescoPrices = async (browser) => {
   
   const buyPrice = textBuy.substring(12, 17).trim();
   const sellPrice = textBuy.substring(23, 29).trim();
-  const euroBuyPrice = textBuy.substring(41, 46).trim();
-  const euroSellPrice = textBuy.substring(52, 57).trim();
+  const euroBuyPrice = textBuy.substring(42, 47).trim();
+  const euroSellPrice = textBuy.substring(53, 58).trim();
 
   const prices = new BankPrice('banesco', buyPrice, sellPrice, euroBuyPrice, euroSellPrice);
 
@@ -318,11 +318,12 @@ const getBhdLeonPrices = async(browser) => {
   
     await page.goto('https://www.bhdleon.com.do', puppeteerPageConfig)
   
-    await page.setViewport({ width: 1920, height: 888 })
+    await page.setViewport({ width: 1920, height: 937 })
     
-    await page.waitForSelector('.footer-content-menu > .footer-menu-social > .footer-menu > li:nth-child(5) > .dialog_opener')
-    await page.click('.footer-content-menu > .footer-menu-social > .footer-menu > li:nth-child(5) > .dialog_opener')
+    await page.waitForSelector('.footer-content-menu');
+    const dialogWithTasas =  await page.$x("//a[contains(., 'Tasas de Cambio')]");
     
+    await dialogWithTasas[0].click();
     await page.waitForSelector('#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(2)')
     const dollarBuyElement = await page.$('#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(2)')
     const dollarSellElement = await page.$('#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(3)')
@@ -569,16 +570,26 @@ const getQuezadaPrices = async(browser) => {
   
   await page.setViewport({ width: 1920, height: 937 })
   
-  await page.waitForSelector('.row > .twelve > .blog-content-wrapper > .blog-content > p:nth-child(1)');
-  const dollarElement = await page.$('.row > .twelve > .blog-content-wrapper > .blog-content > p:nth-child(1)');
-  const euroElement = await page.$('.row > .twelve > .blog-content-wrapper > .blog-content > p:nth-child(2)');
+  await page.waitForSelector('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
+  await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
+  
+  await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
+  await page.click('.blog-content-wrapper > .blog-content > ul > .da-chk > strong')
+  
+  await page.click('.blog-content-wrapper > .blog-content > ul > .da-chk > strong')
+  await page.click('.blog-content-wrapper > .blog-content > ul > .e-ef > strong')
+  
+  await page.click('.twelve > .blog-content-wrapper > .blog-content > ul > .e-ef')
 
-  const dollarBuyPrice =  await page.evaluate(element => element.textContent.substring(13, 18), dollarElement);
-  const euroBuyPrice =  await page.evaluate(element => element.textContent.substring(13, 18), euroElement);
-  const dollarSellPrice =  await page.evaluate(element => element.textContent.substring(26, 32), euroElement);
-  const euroSellPrice =  await page.evaluate(element => element.textContent.substring(26, 32), euroElement);
+  const dollarElement = await page.$('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
+  const euroElement = await page.$('.blog-content-wrapper > .blog-content > ul > .e-ef > strong');
 
-  const prices = new BankPrice('quezada', dollarBuyPrice,dollarSellPrice, euroBuyPrice, euroSellPrice, 0, 0, 0, 0);
+  const dollarBuyPrice =  await page.evaluate(element => element.textContent.substring(8, 13), dollarElement);
+  const dollarSellPrice =  await page.evaluate(element => element.textContent.substring(21, 26), dollarElement);
+  const euroBuyPrice =  await page.evaluate(element => element.textContent.substring(8, 13), euroElement);
+  const euroSellPrice =  await page.evaluate(element => element.textContent.substring(21, 26), euroElement);
+
+  const prices = new BankPrice('quezada', dollarBuyPrice, dollarSellPrice, euroBuyPrice, euroSellPrice, 0, 0, 0, 0);
 
   console.log(prices);
   return prices;
