@@ -7,7 +7,7 @@ const bankService = require('./services/bankPricesService');
 const sentry = require('@sentry/node')
 
 sentry.init({
-  dsn: ''
+  dsn: process.env.SENTRYDSN
 })
 
 app.use(sentry.Handlers.requestHandler());
