@@ -75,12 +75,15 @@ const getAsociacionAhorrosPrices = async (browser) => {
         prices.euroSell = sellPrice;
       }
     }
+    
+    await page.close();
+
+    return prices;
+
   } catch (error) {
     console.log(error);
   }
   console.log(prices);
-  await page.close();
-  return prices;
 }
 
 const getBancoCaribePrices = async (browser) => {
@@ -713,8 +716,6 @@ const getPeraviaPrices = async (browser) => {
     await browser.close();
   }
 }
-
-
 
 const getTextContentForPrices = async (page, priceElement) => {
   const price = await page.evaluate(element => element.textContent, priceElement);
