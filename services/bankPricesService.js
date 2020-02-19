@@ -2,7 +2,7 @@
 
 const path = require('path');
 const admin = require('firebase-admin');
-const serviceAccount = require('../ google-credentials.json');
+const serviceAccount = require('../google-credentials.json');
 
 
 admin.initializeApp({
