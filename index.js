@@ -4,15 +4,26 @@ const cron = require('node-cron')
 const port = process.env.PORT || 3000;
 const scraper = require('./utils/scraper');
 const bankService = require('./services/bankPricesService');
+const sentry = require('@sentry/node')
 
+sentry.init({
+  dsn: ''
+})
+
+app.use(sentry.Handlers.requestHandler());
 
 const routes = require('./routes/pricesRoutes');
+
 routes.routes(app);
 
-cron.schedule("0 0 */5 * * * *", function() {
+app.use(sentry.Handlers.errorHandler());
+
+
+cron.schedule("0 0 */8 * * * *", function() {
   scraper.initNavigation()
       .then(data => {
         bankService.addBankPrices(data);
+        sentry.captureMessage("Updated prices succesfully on: " + new Date().toLocaleDateString());
         console.log("Updated prices succesfully on: " + new Date().toLocaleDateString());
   });
 });

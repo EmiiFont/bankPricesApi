@@ -9,6 +9,7 @@
   "author": "Emilio Font",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^5.12.2",
     "express": "^4.17.1",
     "firebase-admin": "^8.6.1",
     "flat-cache": "^2.0.1",
