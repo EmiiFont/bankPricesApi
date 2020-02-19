@@ -5,7 +5,7 @@ const BankPrice = require('../models/bankprice');
 const puppeteerPageConfig =  {waitUntil: 'load', timeout: 0};
 
 const initNavigation = async () => {
-   const browser = await puppeteer.launch();
+   const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
         
    let allPrices = await Promise.all([
         getBanReservasPrices(browser),
