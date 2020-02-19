@@ -29,4 +29,4 @@ cron.schedule("0 0 */8 * * * *", function() {
 });
 
 
-app.listen(port, () => console.log(`listening on port ${port}!`))
+app.listen(port, () => console.log(`listening on port ${process.env.PORT}!`))
