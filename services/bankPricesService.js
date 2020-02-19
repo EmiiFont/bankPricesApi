@@ -2,7 +2,7 @@
 
 const path = require('path');
 const admin = require('firebase-admin');
-const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+const serviceAccount = require('../bankpricesstore-firebase-cred.json');
 
 
 admin.initializeApp({
