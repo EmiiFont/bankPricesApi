@@ -3,14 +3,14 @@
 const puppeteer = require('puppeteer');
 const BankPrice = require('../models/bankprice');
 const puppeteerPageConfig = { waitUntil: 'load', timeout: 0 };
+const sentry = require('@sentry/node')
 
 const initNavigation = async () => {
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch();
 
   let allPrices = await Promise.all([
     getBanReservasPrices(browser),
     getBancoPopularPrices(browser),
-    getBhdLeonPrices(browser),
     getScotiaBankPrices(browser),
     getBancoActivoPrices(browser),
     getBancoBdiPrices(browser),
@@ -81,6 +81,7 @@ const getAsociacionAhorrosPrices = async (browser) => {
     return prices;
 
   } catch (error) {
+    sentry.captureException(error);
     console.log(error);
   }
   console.log(prices);
@@ -301,7 +302,6 @@ const getBanReservasPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
   }
 }
 
@@ -337,7 +337,8 @@ const getBancoPopularPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 }
 
@@ -374,7 +375,8 @@ const getBhdLeonPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 }
 const getScotiaBankPrices = async (browser) => {
@@ -411,7 +413,8 @@ const getScotiaBankPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -445,7 +448,8 @@ const getBancoActivoPrices = async (browser) => {
 
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -476,7 +480,8 @@ const getBancoSantaCruzPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -512,7 +517,8 @@ const getBancoVimencaPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -546,7 +552,8 @@ const getBancamericaPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -582,7 +589,8 @@ const getBancoLafise = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -609,7 +617,8 @@ const getAsociacionNacionalPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -646,7 +655,8 @@ const getAcnPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -685,7 +695,8 @@ const getQuezadaPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 
 }
@@ -713,7 +724,8 @@ const getPeraviaPrices = async (browser) => {
     return prices;
   }
   catch (error) {
-    await browser.close();
+    sentry.captureException(error);
+    console.log(error);
   }
 }
 
