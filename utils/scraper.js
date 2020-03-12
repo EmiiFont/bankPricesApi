@@ -1,9 +1,14 @@
 'use strict';
 
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const https = require('https');
 const BankPrice = require('../models/bankprice');
 const puppeteerPageConfig = { waitUntil: 'load', timeout: 0 };
 const sentry = require('@sentry/node')
+const excelpar = require('../utils/excelParser')
+const functionPromise = require('../utils/functionUtilities')
+
 
 const initNavigation = async () => {
   const browser = await puppeteer.launch();
@@ -27,7 +32,8 @@ const initNavigation = async () => {
     getBancoSantaCruzPrices(browser),
     getAsociacionAhorrosPrices(browser),
     getAsociacionNacionalPrices(browser),
-    getPeraviaPrices(browser)
+    getPeraviaPrices(browser),
+    getPricesFromBancoCentral()
   ]);
 
   await browser.close();
@@ -727,6 +733,54 @@ const getPeraviaPrices = async (browser) => {
     sentry.captureException(error);
     console.log(error);
   }
+}
+
+
+const getPricesFromBancoCentral = async() =>{
+  let dollarPrices;
+  let otherCurrencies; 
+  const fileNameUs = "bancocentraltasasus.xls";
+  const filenameOther = "bancocentraltasasother.xls";
+
+  try {
+      var sourceUrls = "bancocentraltasas.xls";
+      fs.unlinkSync(fileNameUs);
+      fs.unlinkSync(filenameOther);
+     } catch(err){
+      console.log(err);
+  }
+
+  const file = fs.createWriteStream(fileNameUs);
+  const other = fs.createWriteStream(filenameOther);
+  file.on('finish', function() {
+      let result = excelpar.readDownloadedExcel(file.path);
+      dollarPrices = result[result.length - 1];
+   });
+
+  other.on('finish', function() {
+      let result = excelpar.readDownloadedExcel(other.path);
+      otherCurrencies = result[result.length - 1];
+  });
+
+  const requestus = https.get("https://cdn.bancentral.gov.do/documents/estadisticas/mercado-cambiario/documents/TASA_DOLAR_REFERENCIA_MC.xls", function(response) {
+      response.pipe(file);
+    });
+
+    const request = https.get("https://cdn.bancentral.gov.do/documents/estadisticas/mercado-cambiario/documents/TASAS_CONVERTIBLES_OTRAS_MONEDAS.xls", function(response) {
+      response.pipe(other);
+    });
+
+  let prices = new BankPrice();
+ 
+  await Promise.all([functionPromise.promiseForStream(file), functionPromise.promiseForStream(other)]).then(() => {
+      console.log(otherCurrencies['EURO']);
+      console.log(dollarPrices['Compra']);
+
+     prices = new BankPrice('central', dollarPrices['Compra'], dollarPrices['Venta'], otherCurrencies['EURO'], 0, otherCurrencies['LIBRA ESTERLINA'], 0, otherCurrencies['DOLAR CANADIENSE'], 0);
+     
+  });
+  
+  return prices;
 }
 
 const getTextContentForPrices = async (page, priceElement) => {

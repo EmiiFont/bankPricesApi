@@ -2,7 +2,7 @@
 
 const path = require('path');
 const admin = require('firebase-admin');
-const serviceAccount = require('../google-credentials.json');
+const serviceAccount = require('../google-credentials-test.json');
 
 
 admin.initializeApp({
@@ -10,7 +10,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const bucket = admin.storage().bucket('gs://bankpricesstore.appspot.com');
+const bucket = admin.storage().bucket('gs://bankpricestore-test.appspot.com');
 
 const config = {
     action: 'read',
@@ -25,32 +25,48 @@ const addPrice = (bankPrice) => {
 
 const addBankPrices = async(bankPricesArr) => {
     for(let bank of bankPricesArr){
+
+        if(bank == undefined) continue;
         
         let docRef = db.collection('banks').doc(bank.name);
         let docData = await docRef.get();
         let document = docData.data();
         
-        if(document.dollarBuy != undefined){
-           bank.USBuyChange = getTypeOfChange(bank, document, 'dollarBuy');
+        if(document != undefined){
+            if(document.dollarBuy != undefined){
+                bank.USBuyChange = getTypeOfChange(bank, document, 'dollarBuy');
+             }
+             if(document.dollarSell != undefined){
+                 bank.USSellChange = getTypeOfChange(bank, document, 'dollarSell');
+             }
+             if(document.euroBuy != undefined){
+                 bank.EUBuyChange = getTypeOfChange(bank, document, 'euroBuy');
+             }
+             if(document.euroSell != undefined){
+                 bank.EUSellChange = getTypeOfChange(bank, document, 'euroSell');
+             }
         }
-        if(document.dollarSell != undefined){
-            bank.USSellChange = getTypeOfChange(bank, document, 'dollarSell');
-        }
-        if(document.euroBuy != undefined){
-            bank.EUBuyChange = getTypeOfChange(bank, document, 'euroBuy');
-        }
-        if(document.euroSell != undefined){
-            bank.EUSellChange = getTypeOfChange(bank, document, 'euroSell');
-        }
-
+        
+        bank.date = new Date();
+        
         docRef.collection('prices').doc(JSON.parse(JSON.stringify(bank.date))).set(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
             console.log(writeResult);
         });
-        docRef.update(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
-            console.log(writeResult);
-        });
+        
+        if(document != undefined){
+            docRef.update(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
+                console.log(writeResult);
+            });
+        }else{
+            docRef.set(JSON.parse(JSON.stringify(bank)), { merge: true }).then(writeResult =>{
+                console.log("added bank to the store " + bank.name);
+            })
+        }
     }
 }
+
+
+
 
 const getTypeOfChange = (newObj, oldObj, property) =>{
     return newObj[property] > oldObj[property] ? 'Increase' : newObj[property] == oldObj[property] ? 'Equal' : 'Decrease';
