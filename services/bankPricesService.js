@@ -2,7 +2,7 @@
 
 const path = require('path');
 const admin = require('firebase-admin');
-const serviceAccount = require('../google-credentials-test.json');
+const serviceAccount = require('../google-credentials.json');
 
 
 admin.initializeApp({
@@ -10,7 +10,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const bucket = admin.storage().bucket('gs://bankpricestore-test.appspot.com');
+const bucket = admin.storage().bucket('gs://bankpricesstore.appspot.com');
 
 const config = {
     action: 'read',

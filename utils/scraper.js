@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const https = require('https');
 const BankPrice = require('../models/bankprice');
-const puppeteerPageConfig = { waitUntil: 'load', timeout: 0 };
+const puppeteerPageConfig = { waitUntil: 'domcontentloaded', timeout: 0 };
 const sentry = require('@sentry/node')
 const excelpar = require('../utils/excelParser')
 const functionPromise = require('../utils/functionUtilities');
@@ -27,27 +27,27 @@ const initNavigation = async () => {
   const browser = await puppeteer.launch();
 
   let allPrices = await Promise.all([
-    getBanReservasPrices(browser),
-    getBancoPopularPrices(browser),
-    getScotiaBankPrices(browser),
-    getBancoActivoPrices(browser),
-    getBancoBdiPrices(browser),
-    getBancoCaribePrices(browser),
-    getBanescoPrices(browser),
-    getPromericaPrices(browser),
-    getLopezDeHaroPrices(browser),
-    getCaribeExpressPrices(browser),
-    getAcnPrices(browser),
-    getQuezadaPrices(browser),
-    getBancoVimencaPrices(browser),
-    getBancoLafise(browser),
-    getBancamericaPrices(browser),
-    getBancoSantaCruzPrices(browser),
-    getAsociacionAhorrosPrices(browser),
-    getAsociacionNacionalPrices(browser),
-    getPeraviaPrices(browser),
+    // getBanReservasPrices(browser),
+    // getBancoPopularPrices(browser),
+    // getScotiaBankPrices(browser),
+    // getBancoActivoPrices(browser),
+    // getBancoBdiPrices(browser),
+    // getBancoCaribePrices(browser),
+    // getBanescoPrices(browser),
+    // getPromericaPrices(browser),
+    // getLopezDeHaroPrices(browser),
+    // getCaribeExpressPrices(browser),
+    // getAcnPrices(browser),
+    // getQuezadaPrices(browser),
+    // getBancoVimencaPrices(browser),
+    // getBancoLafise(browser),
+    // getBancamericaPrices(browser),
+    // getBancoSantaCruzPrices(browser),
+    // getAsociacionAhorrosPrices(browser),
+    // getAsociacionNacionalPrices(browser),
+    // getPeraviaPrices(browser),
     getPricesFromBancoCentral(),
-    getBhdLeonPrices(browser)
+   // getBhdLeonPrices(browser)
   ]);
 
   await browser.close();
@@ -560,8 +560,8 @@ const getBancoSantaCruzPrices = async (browser) => {
 
     let dollar = new CurrencyInfo(DOLLAR_SYMBOL, usd.precio_compra, usd.precio_venta);
     let euro = new CurrencyInfo(EURO_SYMBOL, eur.precio_compra, eur.precio_venta);
-    let gbpCurrency = new CurrencyInfo(EURO_SYMBOL, gbp.precio_compra, gbp.precio_venta);
-    let cadCurrency = new CurrencyInfo(EURO_SYMBOL, cad.precio_compra, cad.precio_venta);
+    let gbpCurrency = new CurrencyInfo(POUND_SYMBOL, gbp.precio_compra, gbp.precio_venta);
+    let cadCurrency = new CurrencyInfo(CAD_SYMBOL, cad.precio_compra, cad.precio_venta);
    
     let currencies = [dollar, euro, gbpCurrency, cadCurrency];
 
@@ -942,8 +942,14 @@ const getPricesFromBancoCentral = async() =>{
   await Promise.all([functionPromise.promiseForStream(file), functionPromise.promiseForStream(other)]).then(() => {
       console.log(otherCurrencies['EURO']);
       console.log(dollarPrices['Compra']);
+       
+     let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dollarPrices['Compra'], dollarPrices['Venta']);
+     let euro = new CurrencyInfo(EURO_SYMBOL, otherCurrencies['EURO'], 0);
+     let pound = new CurrencyInfo(POUND_SYMBOL, otherCurrencies['LIBRA ESTERLINA'], 0);
+     let cad = new CurrencyInfo(CAD_SYMBOL, otherCurrencies['DOLAR CANADIENSE'], 0);
 
-     prices = new BankPrice('central', dollarPrices['Compra'], dollarPrices['Venta'], otherCurrencies['EURO'], 0, otherCurrencies['LIBRA ESTERLINA'], 0, otherCurrencies['DOLAR CANADIENSE'], 0);
+     let currencies = [dollar, euro, pound, cad];
+     prices = new BankPrice('central', dollarPrices['Compra'], dollarPrices['Venta'], otherCurrencies['EURO'], 0, currencies, false);
      
   });
   
