@@ -19,7 +19,7 @@ routes.routes(app);
 app.use(sentry.Handlers.errorHandler());
 
 
-cron.schedule("0 0 */8 * * * *", function() {
+cron.schedule("0 17 * * *", function() {
   scraper.initNavigation()
       .then(data => {
         bankService.addBankPrices(data);

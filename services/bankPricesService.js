@@ -23,6 +23,7 @@ const addPrice = (bankPrice) => {
     });
 }
 
+
 const addBankPrices = async(bankPricesArr) => {
     for(let bank of bankPricesArr){
 
@@ -33,18 +34,33 @@ const addBankPrices = async(bankPricesArr) => {
         let document = docData.data();
         
         if(document != undefined){
-            if(document.dollarBuy != undefined){
-                bank.USBuyChange = getTypeOfChange(bank, document, 'dollarBuy');
-             }
-             if(document.dollarSell != undefined){
-                 bank.USSellChange = getTypeOfChange(bank, document, 'dollarSell');
-             }
-             if(document.euroBuy != undefined){
-                 bank.EUBuyChange = getTypeOfChange(bank, document, 'euroBuy');
-             }
-             if(document.euroSell != undefined){
-                 bank.EUSellChange = getTypeOfChange(bank, document, 'euroSell');
-             }
+            let lastPriceDoc;
+             await docRef.collection('prices').orderBy('date','desc').limit(3).get().then(function(querySnapshot) {
+                querySnapshot.forEach(function(doc) {
+                    let d = doc.data();
+                    if(new Date(d.date).getDate() < bank.date.getDate()){
+                        lastPriceDoc = d;
+                    }
+                });
+            })
+            .catch(function(error) {
+                console.log("Error getting documents: ", error);
+            });
+
+            if(lastPriceDoc != undefined) {
+                if(lastPriceDoc.dollarBuy != undefined){
+                    bank.USBuyChange = getTypeOfChange(bank, lastPriceDoc, 'dollarBuy');
+                }
+                if(lastPriceDoc.dollarSell != undefined){
+                    bank.USSellChange = getTypeOfChange(bank, lastPriceDoc, 'dollarSell');
+                }
+                if(lastPriceDoc.euroBuy != undefined){
+                    bank.EUBuyChange = getTypeOfChange(bank, lastPriceDoc, 'euroBuy');
+                }
+                if(lastPriceDoc.euroSell != undefined){
+                    bank.EUSellChange = getTypeOfChange(bank, lastPriceDoc, 'euroSell');
+                }
+            }; 
         }
         
         bank.date = new Date();
