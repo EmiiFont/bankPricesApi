@@ -33,14 +33,16 @@ const addBankPrices = async(bankPricesArr) => {
         let docData = await docRef.get();
         let document = docData.data();
         
+        let now = new Date();
+        let yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+
         if(document != undefined){
             let lastPriceDoc;
-             await docRef.collection('prices').orderBy('date','desc').limit(3).get().then(function(querySnapshot) {
+             await docRef.collection('prices').where('date', '>=', yesterday.toISOString()).limit(1).get().then(function(querySnapshot) {
                 querySnapshot.forEach(function(doc) {
                     let d = doc.data();
-                    if(new Date(d.date).getDate() < bank.date.getDate()){
-                        lastPriceDoc = d;
-                    }
+                    lastPriceDoc = d;
+                    console.log(d);
                 });
             })
             .catch(function(error) {

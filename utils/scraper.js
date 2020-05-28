@@ -26,28 +26,32 @@ class CurrencyInfo{
 const initNavigation = async () => {
   const browser = await puppeteer.launch();
 
+   //  getCaribeExpressPrices(browser),
+   // getAcnPrices(browser),
+   // getQuezadaPrices(browser),
   let allPrices = await Promise.all([
-    // getBanReservasPrices(browser),
-    // getBancoPopularPrices(browser),
-    // getScotiaBankPrices(browser),
-    // getBancoActivoPrices(browser),
-    // getBancoBdiPrices(browser),
-    // getBancoCaribePrices(browser),
-    // getBanescoPrices(browser),
-    // getPromericaPrices(browser),
-    // getLopezDeHaroPrices(browser),
-    // getCaribeExpressPrices(browser),
-    // getAcnPrices(browser),
-    // getQuezadaPrices(browser),
-    // getBancoVimencaPrices(browser),
-    // getBancoLafise(browser),
-    // getBancamericaPrices(browser),
-    // getBancoSantaCruzPrices(browser),
-    // getAsociacionAhorrosPrices(browser),
-    // getAsociacionNacionalPrices(browser),
-    // getPeraviaPrices(browser),
+    getPricesFromEmpire(browser),
+    getjmmbPrices(browser),
+    getBanReservasPrices(browser),
+    getBancoPopularPrices(browser),
+    getScotiaBankPrices(browser),
+     getBancoActivoPrices(browser),
+     getBancoBdiPrices(browser),
+     getBancoCaribePrices(browser),
+      getBanescoPrices(browser),
+      getPromericaPrices(browser),
+     getLopezDeHaroPrices(browser),
+     getBancoVimencaPrices(browser),
+     getBancoLafise(browser),
+     getAcnPrices(browser),
+    getBancamericaPrices(browser),
+    getBancoSantaCruzPrices(browser),
+    getAsociacionAhorrosPrices(browser),
+     getAsociacionNacionalPrices(browser),
+     getPeraviaPrices(browser),
     getPricesFromBancoCentral(),
-   // getBhdLeonPrices(browser)
+    getBhdLeonPrices(browser),
+    getProgesoPrices(browser)
   ]);
 
   await browser.close();
@@ -153,7 +157,7 @@ const getPromericaPrices = async (browser) => {
 
   await page.setViewport({ width: 1920, height: 937 });
   await page.goto('https://www.promerica.com.do/', puppeteerPageConfig);
-
+  await page.waitFor(2000);
 
   await page.waitForSelector('.row > #tipoCambioHome > .col-sm-6 > nav > .tipoEuro');
 
@@ -271,24 +275,31 @@ const getBanescoPrices = async (browser) => {
 
   await page.goto('https://www.banesco.com.do/', puppeteerPageConfig);
 
-
+ 
   await page.waitForSelector('.views-element-container > .view-home-tasa-de-cambio > .view-content > .views-row > p:nth-child(3)');
 
   const pricesElement = await page.$('.views-element-container > .view-home-tasa-de-cambio > .view-content > .views-row > p:nth-child(3)');
 
   const textBuy = await page.evaluate(element => element.textContent, pricesElement);
+ 
+  let splittedText = textBuy.split("RD$");
+  const regex = /[\d\.]+/;
 
-  const buyPrice = textBuy.substring(12, 17).trim();
-  const sellPrice = textBuy.substring(23, 29).trim();
-  const euroBuyPrice = textBuy.substring(42, 47).trim();
-  const euroSellPrice = textBuy.substring(53, 58).trim();
+  const buyPrice = parseFloat(splittedText[1].match(regex) || 0);
+  const sellPrice = parseFloat(splittedText[2].match(regex) || 0);
+  const euroBuyPrice = parseFloat(splittedText[3].match(regex) || 0);
+  const euroSellPrice = parseFloat(splittedText[4].match(regex) || 0);
 
   let dollar = new CurrencyInfo(DOLLAR_SYMBOL,  buyPrice, sellPrice);
   let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyPrice, euroSellPrice);
  
   let currencies = [dollar, euro];
+ 
+  let showError = false;
 
-  const prices = new BankPrice('banesco', buyPrice, sellPrice, euroBuyPrice, euroSellPrice, currencies, false);
+  if(buyPrice == 0 || sellPrice == 0 || euroBuyPrice ==0 || euroSellPrice == 0) showError = true;
+
+  const prices = new BankPrice('banesco', buyPrice, sellPrice, euroBuyPrice, euroSellPrice, currencies, showError);
 
   console.log(prices);
 
@@ -302,8 +313,8 @@ const getCaribeExpressPrices = async (browser) => {
   await page.setViewport({ width: 1920, height: 937 });
 
   await page.goto('https://caribeexpress.com.do/', puppeteerPageConfig);
-
-  await page.setViewport({ width: 1920, height: 937 });
+  
+  await page.waitFor(3000);
 
   await page.waitForSelector('#content-wrapper > .container > .plan:nth-child(3) > .plan-price > .value');
 
@@ -314,11 +325,11 @@ const getCaribeExpressPrices = async (browser) => {
   const euroBuyPrice = await page.evaluate(element => element.textContent, euroBuyElement);
 
   let dollar = new CurrencyInfo(DOLLAR_SYMBOL,  dollarBuyPrice.trim(), 0);
-  let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyPrice, 0);
+  let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyPrice.trim(), 0);
  
   let currencies = [dollar, euro];
 
-  const prices = new BankPrice('caribeExpress', dollarBuyPrice.trim(), 0, euroBuyPrice.trim(), 0);
+  const prices = new BankPrice('caribeExpress', dollarBuyPrice.trim(), 0, euroBuyPrice.trim(), 0, currencies);
 
   console.log(prices);
 
@@ -371,7 +382,8 @@ const getBancoPopularPrices = async (browser) => {
     const page = await browser.newPage();
 
     await page.goto('https://www.popularenlinea.com/personas/Paginas/Home.aspx', puppeteerPageConfig);
-
+    await page.waitFor(2000);
+   
     await page.setViewport({ width: 1920, height: 888 });
 
     await page.waitForSelector('#tasa_dolar_desktop #compra_peso_dolar_desktop');
@@ -461,31 +473,44 @@ const getScotiaBankPrices = async (browser) => {
 
     await page.setViewport({ width: 1920, height: 888 })
 
-    let frames = await page.frames()
-    const frame_3309 = frames.find(f => f.url() === 'https://www4.scotiabank.com/cgi-bin/ratesTool/depdisplay.cgi?pid=80')
-    await frame_3309.waitForSelector('#table892 #tb892row2col3cell4320')
+     
+      // await page.waitForSelector('.\_bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(3)')
+      // await page.click('.\_bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(3)')
+      
+      // await page.waitForSelector('.\_bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(4)')
+      // await page.click('.\_bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(4)')
+      
+      // await page.waitForSelector('.\_bns--table > .bns--table > tbody > tr:nth-child(3) > td:nth-child(3)')
+      // await page.click('.\_bns--table > .bns--table > tbody > tr:nth-child(3) > td:nth-child(3)')
+      
+      // await page.waitForSelector('.\_bns--table > .bns--table > tbody > tr:nth-child(3) > td:nth-child(4)')
+      // await page.click('.\_bns--table > .bns--table > tbody > tr:nth-child(3) > td:nth-child(4)')
+      
+      // await page.waitForSelector('.\_bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(3)')
+      // await page.click('.\_bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(3)')
+      
+      // await page.waitForSelector('.\_bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(4)')
+      // await page.click('.\_bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(4)')
 
-    const dollarBuyElement = await frame_3309.$('#table892 #tb892row2col3cell4320');
-    const dollarSellElement = await frame_3309.$('#table892 #tb892row2col4cell4321');
 
-    const euroBuyElement = await frame_3309.$('#table893 #tb893row2col3cell4340');
-    const euroSellElement = await frame_3309.$('#table893 #tb893row2col4cell4341');
+    const dollarBuyElement = await page.$('.\_bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(3)');
+    const dollarSellElement = await page.$('.\_bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(4)');
 
-    const dollarBuyPrice = await frame_3309.evaluate(element => element.textContent, dollarBuyElement);
-    const dollarSellPrice = await frame_3309.evaluate(element => element.textContent, dollarSellElement);
+    const euroBuyElement = await page.$('.\_bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(3)');
+    const euroSellElement = await page.$('.\_bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(4)');
 
-    const euroBuyPrice = await frame_3309.evaluate(element => element.textContent, euroBuyElement);
-    const euroSellPrice = await frame_3309.evaluate(element => element.textContent, euroSellElement);
+    const dollarBuyPrice = await page.evaluate(element => element.textContent, dollarBuyElement);
+    const dollarSellPrice = await page.evaluate(element => element.textContent, dollarSellElement);
 
-    let eurBuyCal = dollarBuyPrice.trim() * euroBuyPrice.trim();
-    let eurSellCal = dollarSellPrice.trim() * euroSellPrice.trim();
+    const euroBuyPrice = await page.evaluate(element => element.textContent, euroBuyElement);
+    const euroSellPrice = await page.evaluate(element => element.textContent, euroSellElement);
 
     let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dollarBuyPrice.trim(), dollarSellPrice.trim());
-    let euro = new CurrencyInfo(EURO_SYMBOL, eurBuyCal, eurSellCal);
+    let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyPrice.trim(), euroSellPrice.trim());
    
     let currencies = [dollar, euro];
 
-    const prices = new BankPrice('scotiaBank', dollarBuyPrice.trim(), dollarSellPrice.trim(), eurBuyCal, eurSellCal, currencies, false);
+    const prices = new BankPrice('scotiaBank', dollarBuyPrice.trim(), dollarSellPrice.trim(), euroBuyPrice.trim(), euroSellPrice.trim(), currencies, false);
 
     console.log(prices);
     await page.close();
@@ -584,6 +609,7 @@ const getBancoVimencaPrices = async (browser) => {
     const page = await browser.newPage();
 
     await page.goto('https://www.bancovimenca.com/', puppeteerPageConfig);
+    await page.waitFor(2000);
 
     await page.setViewport({ width: 1920, height: 888 });
 
@@ -791,11 +817,12 @@ const getQuezadaPrices = async (browser) => {
     const page = await browser.newPage();
 
     await page.goto('http://agentedecambioquezada.com/', puppeteerPageConfig)
+    await page.waitFor(2000);
 
     await page.setViewport({ width: 1920, height: 937 })
 
-    await page.waitForSelector('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
+    await page.waitForSelector('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
+    await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
 
     await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
     await page.click('.blog-content-wrapper > .blog-content > ul > .da-chk > strong')
@@ -899,6 +926,131 @@ const getPeraviaPrices = async (browser) => {
     sentry.captureException(error);
     console.log(error);
     return new BankPrice('pervia', 0,0,0,0,[], true);
+  }
+}
+
+const getProgesoPrices = async (browser) => {
+  try {
+    const page = await browser.newPage();
+
+    await page.goto('https://www.progreso.com.do/', puppeteerPageConfig);
+    await page.waitFor(2000);
+
+    await page.setViewport({ width: 1920, height: 937 });
+
+    await page.waitForSelector('.diario > .box4 > .row > .col-xs-3:nth-child(1) > h3')
+    let dollarBuyElement = await page.$('.diario > .box4 > .row > .col-xs-3:nth-child(1) > h3')
+    let dollarSellElement =await page.$('.diario > .box4 > .row > .col-xs-3:nth-child(2) > h3')
+    let euroBuyElement =await page.$('.diario > .box4 > .row > .col-xs-3:nth-child(3) > h3')
+    let euroSellElement =await page.$('.diario > .box4 > .row > .col-xs-3:nth-child(4) > h3')
+
+    const dollarBuyPrice = await getTextContentForPrices(page, dollarBuyElement);
+    const dollarSellPrice = await getTextContentForPrices(page, dollarSellElement);
+    const euroBuyPrice = await getTextContentForPrices(page, euroBuyElement);
+    const euroSellPrice = await getTextContentForPrices(page, euroSellElement);
+    
+    let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dollarBuyPrice, dollarSellPrice);
+    let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyPrice, euroSellPrice);
+ 
+    let currencies = [dollar, euro];
+
+    const prices = new BankPrice('progreso', dollarBuyPrice, dollarSellPrice, euroBuyPrice, euroSellPrice, currencies, false);
+    
+    await page.close();
+
+    return prices;
+  }
+  catch (error) {
+    sentry.captureException(error);
+    console.log(error);
+    return new BankPrice('progreso', 0,0,0,0,[], true);
+  }
+}
+
+
+const getPricesFromEmpire =  async(browser) => {
+
+  try{
+
+  const page = await browser.newPage();
+  
+  await page.goto('https://www.bancoempire.com.do');
+  
+  await page.setViewport({ width: 1920, height: 937 });
+  
+  let frames = await page.frames()
+  const dollarBuyPrice = await getEmpireFrameContent(page, frames, 'https://www.bancoempire.com.do/txt/dollarcompra.txt');
+  const dollarSellPrice = await getEmpireFrameContent(page, frames, 'https://www.bancoempire.com.do/txt/dollarventa.txt');
+  const euroBuyPrice = await getEmpireFrameContent(page, frames, 'https://www.bancoempire.com.do/txt/eurocompra.txt');
+  const euroSellPrice = await getEmpireFrameContent(page, frames, 'https://www.bancoempire.com.do/txt/euroventa.txt');
+
+  let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dollarBuyPrice, dollarSellPrice);
+ 
+  let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyPrice, euroSellPrice);
+
+  let currencies = [dollar, euro];
+
+  const prices = new BankPrice('empire', dollarBuyPrice, dollarSellPrice, euroBuyPrice, euroSellPrice, currencies, false);
+  
+  await page.close();
+
+  return prices;
+}
+  catch(error){
+    sentry.captureException(error);
+    console.log(error);
+    return new BankPrice('empire', 0,0,0,0,[], true);
+  }
+}
+
+const getEmpireFrameContent = async (page, pageFrames, url) => {
+  const contenFrame = pageFrames.find(f => f.url() === url);
+  let contentElement = await contenFrame.$('body > pre');
+  const content =  await getTextContentForPrices(contenFrame, contentElement);
+
+  return content;
+}
+
+const getjmmbPrices = async (browser) =>{
+  try{
+
+    const page = await browser.newPage();
+  
+  await page.goto('https://do-bank.jmmb.com/es/tasas-de-referencia#tasadecambio')
+  
+  await page.setViewport({ width: 2752, height: 962 })
+  
+  await page.waitFor(1000)
+  
+  const dollarBuyElement = await page.$('.table-wrapper:nth-child(3) > .main-table > tbody > tr:nth-child(3) > td:nth-child(2)')
+  
+  const dollarSellElement = await page.$('.table-wrapper > .main-table > tbody > tr:nth-child(3) > td:nth-child(3)')
+  
+  const euroBuyElement =await page.$('.table-wrapper:nth-child(3) > .main-table > tbody > tr:nth-child(4) > td:nth-child(2)')
+  
+  const euroSellElement =await page.$('.table-wrapper > .main-table > tbody > tr:nth-child(4) > td:nth-child(3)')
+  
+  const dollarBuyPrice = await getTextContentForPrices(page, dollarBuyElement);
+  const dollarSellPrice = await getTextContentForPrices(page, dollarSellElement);
+  const euroBuyPrice = await getTextContentForPrices(page, euroBuyElement);
+  const euroSellPrice = await getTextContentForPrices(page, euroSellElement);
+  
+  let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dollarBuyPrice, dollarSellPrice);
+  let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyPrice, euroSellPrice);
+
+  let currencies = [dollar, euro];
+
+  const prices = new BankPrice('jmmb', dollarBuyPrice, dollarSellPrice, euroBuyPrice, euroSellPrice, currencies, false);
+  
+  await page.close();
+
+  return prices;
+
+}
+catch(error){
+  sentry.captureException(error);
+  console.log(error);
+  return new BankPrice('jmmb', 0,0,0,0,[], true);
   }
 }
 
