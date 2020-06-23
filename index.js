@@ -5,6 +5,8 @@ const port = process.env.PORT || 3000;
 const scraper = require('./utils/scraper');
 const bankService = require('./services/bankPricesService');
 const sentry = require('@sentry/node')
+require('dotenv').config();
+
 
 sentry.init({
   dsn: process.env.SENTRYDSN

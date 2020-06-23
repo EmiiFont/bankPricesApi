@@ -1,14 +1,20 @@
 'use strict';
 
 const puppeteer = require('puppeteer');
-const fs = require('fs');
 const https = require('https');
 const BankPrice = require('../models/bankprice');
 const puppeteerPageConfig = { waitUntil: 'domcontentloaded', timeout: 0 };
+const Twitter = require('twitter-lite');
+const fs = require('fs');
+const got = require('got');
+const stream = require('stream');
+const {promisify} = require('util');
 const sentry = require('@sentry/node')
 const excelpar = require('../utils/excelParser')
 const functionPromise = require('../utils/functionUtilities');
+const { exception } = require('console');
 
+const path = './images/image.png';
 const DOLLAR_SYMBOL = "US";
 const EURO_SYMBOL = "EU";
 const FRANC_SYMBOL = "CHF";
@@ -22,6 +28,8 @@ class CurrencyInfo{
     this.sell = sell;
   }
 }
+
+
 
 const initNavigation = async () => {
   const browser = await puppeteer.launch();
@@ -50,6 +58,7 @@ const initNavigation = async () => {
      getAsociacionNacionalPrices(browser),
      getPeraviaPrices(browser),
     getPricesFromBancoCentral(),
+    getMarcosCambioPrices(),
     getBhdLeonPrices(browser),
     getProgesoPrices(browser)
   ]);
@@ -1107,6 +1116,84 @@ const getPricesFromBancoCentral = async() =>{
   
   return prices;
 }
+
+
+
+async function parseImage() {
+  const vision = require('@google-cloud/vision');
+  const client = new vision.ImageAnnotatorClient();
+
+  let rest = await client.textDetection(path);
+
+  return rest[0].textAnnotations[0].description;
+}
+
+async function getMarcosCambioPrices(){
+  try
+  {
+    const pipeline = promisify(stream.pipeline);
+
+    const client = new Twitter({
+      subdomain: "api", // "api" is the default (change for other subdomains)
+      version: "1.1", // version "1.1" is the default (change for other subdomains)
+      consumer_key: process.env.Twitter_consumer_key, // from Twitter.
+      consumer_secret: process.env.Twitter_consumer_secret, // from Twitter.
+      access_token_key: process.env.Twitter_access_token_key, // from your User (oauth_token)
+      access_token_secret: process.env.Twitter_access_secret_token // from your User (oauth_token_secret)
+    });
+    
+    const results = await client.get("statuses/user_timeline", {
+      screen_name: "marcoscambioRD",
+      exclude_replies: true,
+      count: 1
+    });
+
+    await pipeline(
+      got.stream(results[0].extended_entities.media[0].media_url),
+      fs.createWriteStream(path)
+  );
+  
+    let textFromImage = await parseImage();
+
+    if(textFromImage == undefined) return "";
+    let hasDolarIdentifier = textFromImage.indexOf('#Dolares') > 0 && textFromImage.indexOf('Dolares') > 0;
+
+    if(!hasDolarIdentifier) throw exception("text in image in incorrect format");
+    
+    let text = textFromImage.substr(textFromImage.indexOf('Dolares'), textFromImage.length);
+    let paragraphs = text.split('\n');
+    const regex = /[\d\.]+/;
+    
+    let dolarBuy = parseFloat(paragraphs[1].match(regex) || 0);
+    let dolarSell = parseFloat(paragraphs[2].match(regex) || 0);
+    let euroBuy = parseFloat(paragraphs[3].match(regex) || 0);
+    let euroSell = parseFloat(paragraphs[4].match(regex) || 0);
+    let francBuy = parseFloat(paragraphs[5].match(regex) || 0);
+    let cadBuy = parseFloat(paragraphs[6].match(regex) || 0);
+    let gbpBuy = parseFloat(paragraphs[7].replace(',','.').match(regex) || 0);
+  
+    let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dolarBuy, dolarSell);
+    let euro = new CurrencyInfo(EURO_SYMBOL, euroBuy, euroSell);
+    let cad = new CurrencyInfo(CAD_SYMBOL, cadBuy, 0);
+    let gbp = new CurrencyInfo(POUND_SYMBOL, gbpBuy, 0);
+    let franc = new CurrencyInfo(FRANC_SYMBOL, francBuy, 0);
+
+    let currencies = [dollar, euro, cad, gbp];
+
+    const prices = new BankPrice('marcoscambio', dolarBuy, dolarSell, euroBuy, euroSell, currencies, false);
+    return prices;
+  }
+  catch(error){
+    sentry.captureException(error);
+    console.log(error);
+    return new BankPrice('marcoscambio', 0,0,0,0,[], true);
+  }
+}
+
+
+
+
+
 
 const getTextContentForPrices = async (page, priceElement) => {
   const price = await page.evaluate(element => element.textContent, priceElement);
