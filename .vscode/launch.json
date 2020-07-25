@@ -22,6 +22,15 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch DEV Windows",
+            "program": "${workspaceFolder}\\index.js",
+            "env": {
+                "NODE_ENV": "development"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch Mac",
             "program": "${workspaceFolder}/index.js"
         }

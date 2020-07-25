@@ -2,7 +2,8 @@
 
 const path = require('path');
 const admin = require('firebase-admin');
-const serviceAccount = require('../google-credentials.json');
+
+const serviceAccount = process.env.NODE_ENV == "development" ? require('../google-credentials-test.json') : require('../google-credentials.json');
 
 
 admin.initializeApp({
@@ -10,7 +11,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const bucket = admin.storage().bucket('gs://bankpricesstore.appspot.com');
+const bucket = process.env.NODE_ENV == "development" ? admin.storage().bucket('gs://bankpricestore-test.appspot.com') : admin.storage().bucket('gs://bankpricesstore.appspot.com');
 
 const config = {
     action: 'read',
@@ -84,7 +85,37 @@ const addBankPrices = async(bankPricesArr) => {
 }
 
 
+const getAveragePrice = (bankPricesArr) => {
+//     class BankPrice {
+//         constructor(name, dollarBuy, dollarSell, euroBuy, euroSell, currency, error) {
+//           this.name = name;
+//           this.dollarBuy = dollarBuy;
+//           this.dollarSell = dollarSell;
+//           this.euroBuy = euroBuy;
+//           this.euroSell = euroSell;
+//           this.error = error;
+//           this.currency = currency;
+//           this.date = new Date();
+//         }
+//       };
+    
+// class CurrencyInfo{
+//     constructor(symbol, buy, sell){
+//       this.symbol = symbol;
+//       this.buy = buy;
+//       this.sell = sell;
+//     }
+//   }
+let dollarBuySum = 0;
+let dollarSellAvg = 0;
+for(let bank of bankPricesArr){
+    if(bank.dollarBuy > 0)
+      dollarBuyAvg += bank.dollarBuy;
 
+}
+ return dollarBuySum / bankPricesArr.length;
+
+}
 
 const getTypeOfChange = (newObj, oldObj, property) =>{
     return newObj[property] > oldObj[property] ? 'Increase' : newObj[property] == oldObj[property] ? 'Equal' : 'Decrease';
@@ -102,6 +133,8 @@ const uploadFile = async (filePath, bank) => {
     
     return url;
 }
+
+
 
 ///retrieve download url of the images in the bucket
 const retrievePublicUrl = async () => {

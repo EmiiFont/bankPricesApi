@@ -35,11 +35,10 @@ const initNavigation = async () => {
   const browser = await puppeteer.launch();
 
    //  getCaribeExpressPrices(browser),
-   // getAcnPrices(browser),
-   // getQuezadaPrices(browser),
   let allPrices = await Promise.all([
     getPricesFromEmpire(browser),
     getjmmbPrices(browser),
+    getCaribeExpressPrices(browser),
     getBanReservasPrices(browser),
     getBancoPopularPrices(browser),
     getScotiaBankPrices(browser),
@@ -60,8 +59,12 @@ const initNavigation = async () => {
     getPricesFromBancoCentral(),
     getMarcosCambioPrices(),
     getBhdLeonPrices(browser),
-    getProgesoPrices(browser)
-  ]);
+      getQuezadaPrices(browser),
+      getAcnPrices(browser)
+  ].map(p => p.catch(error => {
+    sentry.captureException(error);
+    console.log(error);
+  })));
 
   await browser.close();
 
@@ -317,6 +320,8 @@ const getBanescoPrices = async (browser) => {
 }
 
 const getCaribeExpressPrices = async (browser) => {
+  try{
+
   const page = await browser.newPage();
 
   await page.setViewport({ width: 1920, height: 937 });
@@ -344,6 +349,11 @@ const getCaribeExpressPrices = async (browser) => {
 
   await page.close();
   return prices;
+ }
+ catch(error){
+   return new BankPrice('caribeExpress', 0, 0, 0, 0, currencies, true);
+ }
+ 
 }
 
 const getBanReservasPrices = async (browser) => {
@@ -382,6 +392,8 @@ const getBanReservasPrices = async (browser) => {
     return prices;
   }
   catch (error) {
+    sentry.captureException(error);
+    console.log(error);
     return new BankPrice('banreservas', 0, 0, 0, 0, [], true);
   }
 }
@@ -825,21 +837,12 @@ const getQuezadaPrices = async (browser) => {
   try {
     const page = await browser.newPage();
 
-    await page.goto('http://agentedecambioquezada.com/', puppeteerPageConfig)
+    await page.goto('http://agentedecambioquezada.com/divisas.html', puppeteerPageConfig)
     await page.waitFor(2000);
 
     await page.setViewport({ width: 1920, height: 937 })
 
     await page.waitForSelector('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
-
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-chk > strong')
-
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-chk > strong')
-    await page.click('.blog-content-wrapper > .blog-content > ul > .e-ef > strong')
-
-    await page.click('.twelve > .blog-content-wrapper > .blog-content > ul > .e-ef')
 
     const dollarElement = await page.$('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
     const euroElement = await page.$('.blog-content-wrapper > .blog-content > ul > .e-ef > strong');
@@ -1145,20 +1148,23 @@ async function getMarcosCambioPrices(){
     const results = await client.get("statuses/user_timeline", {
       screen_name: "marcoscambioRD",
       exclude_replies: true,
-      count: 1
+      count: 3
     });
 
-    await pipeline(
-      got.stream(results[0].extended_entities.media[0].media_url),
-      fs.createWriteStream(path)
-  );
+    let textFromImage = "";
+    for(let i = 0; i < 3; i++){
+      await pipeline(
+        got.stream(results[i].extended_entities.media[0].media_url),
+        fs.createWriteStream(path)
+    );
+    
+      textFromImage  = await parseImage();
   
-    let textFromImage = await parseImage();
-
-    if(textFromImage == undefined) return "";
-    let hasDolarIdentifier = textFromImage.indexOf('#Dolares') > 0 && textFromImage.indexOf('Dolares') > 0;
-
-    if(!hasDolarIdentifier) throw exception("text in image in incorrect format");
+      if(textFromImage == undefined) return "";
+      let hasDolarIdentifier = textFromImage.indexOf('#Dolares') > 0 && textFromImage.indexOf('Dolares') > 0;
+  
+      if(hasDolarIdentifier) break;
+    }
     
     let text = textFromImage.substr(textFromImage.indexOf('Dolares'), textFromImage.length);
     let paragraphs = text.split('\n');
@@ -1169,7 +1175,8 @@ async function getMarcosCambioPrices(){
     let euroBuy = parseFloat(paragraphs[3].match(regex) || 0);
     let euroSell = parseFloat(paragraphs[4].match(regex) || 0);
     let francBuy = parseFloat(paragraphs[5].match(regex) || 0);
-    let cadBuy = parseFloat(paragraphs[6].match(regex) || 0);
+    let cadString = paragraphs[6];
+    let cadBuy = cadString.length <= 14 ? parseFloat(paragraphs[6].match(regex) || 0) : parseFloat(paragraphs[6].substring(10).match(regex) || 0);
     let gbpBuy = parseFloat(paragraphs[7].replace(',','.').match(regex) || 0);
   
     let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dolarBuy, dolarSell);

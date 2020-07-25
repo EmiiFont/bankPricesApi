@@ -12,6 +12,8 @@ sentry.init({
   dsn: process.env.SENTRYDSN
 })
 
+console.log(process.env.NODE_ENV);
+
 app.use(sentry.Handlers.requestHandler());
 
 const routes = require('./routes/pricesRoutes');
@@ -20,7 +22,8 @@ routes.routes(app);
 
 app.use(sentry.Handlers.errorHandler());
 
-
+//0 0 */2 * * * cada dos horas
+//0 17 * * * a las 5
 cron.schedule("0 17 * * *", function() {
   scraper.initNavigation()
       .then(data => {
