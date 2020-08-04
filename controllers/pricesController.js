@@ -10,6 +10,9 @@ const path = require('path');
 exports.listPrices = async function(req, res){
 
     //infoScraper.getBancoPopularInf();
+    
+
+
     let logoUrls = await bankService.retrievePublicUrl();
     
     bankNames.bankNames.forEach(bank =>{

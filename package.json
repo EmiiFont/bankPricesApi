@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-     "dev": "export NODE_ENV=dev && node index.js"
+    "dev": "export NODE_ENV=dev && node index.js"
   },
   "author": "Emilio Font",
   "license": "ISC",
@@ -21,7 +21,6 @@
     "node-cron": "^2.0.3",
     "puppeteer": "^1.20.0",
     "twitter-lite": "^0.14.0",
-    "wikijs": "^6.0.1",
     "xlsx": "^0.15.5"
   }
 }
