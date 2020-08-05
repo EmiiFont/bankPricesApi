@@ -16,6 +16,8 @@ const { exception } = require('console');
 const InstagramScrapper = require('../utils/instagramScrapper');
 
 const path = './images/image.png';
+
+//TODO: can this be an enum in a file?
 const DOLLAR_SYMBOL = "US";
 const EURO_SYMBOL = "EU";
 const FRANC_SYMBOL = "CHF";

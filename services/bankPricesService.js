@@ -84,37 +84,66 @@ const addBankPrices = async(bankPricesArr) => {
     }
 }
 
+/** 
+ * Gets the weekly difference of the average price (buys and sells) from a currency
+ * 
+*/
+const getWeeklyDifference = async (bankPricesArr) => {
 
-const getAveragePrice = (bankPricesArr) => {
-//     class BankPrice {
-//         constructor(name, dollarBuy, dollarSell, euroBuy, euroSell, currency, error) {
-//           this.name = name;
-//           this.dollarBuy = dollarBuy;
-//           this.dollarSell = dollarSell;
-//           this.euroBuy = euroBuy;
-//           this.euroSell = euroSell;
-//           this.error = error;
-//           this.currency = currency;
-//           this.date = new Date();
-//         }
-//       };
-    
-// class CurrencyInfo{
-//     constructor(symbol, buy, sell){
-//       this.symbol = symbol;
-//       this.buy = buy;
-//       this.sell = sell;
-//     }
-//   }
-let dollarBuySum = 0;
-let dollarSellAvg = 0;
+let buyAvg = 0;
+let sellAvg = 0;
+let buyLength = 0;
+let sellLength = 0;
+const symbol = 'US';
+
 for(let bank of bankPricesArr){
-    if(bank.dollarBuy > 0)
-      dollarBuyAvg += bank.dollarBuy;
+    if(bank === undefined) continue;
 
+    let avgCurrency = bank.currency.find(d => d.symbol == symbol);
+    
+    if(avgCurrency != undefined){
+        if(parseFloat(avgCurrency.buy) > 0){
+            buyAvg += parseFloat(avgCurrency.buy);
+            buyLength++;
+        }
+        if(parseFloat(avgCurrency.sell) > 0){
+            sellAvg += parseFloat(avgCurrency.sell);
+            sellLength++;
+        }
+    }
 }
- return dollarBuySum / bankPricesArr.length;
 
+let docRef = db.collection('notifications').doc('weekly');
+let docData = await docRef.get();
+let document = docData.data();
+
+let buyAvgToday = buyAvg / buyLength;
+let sellAvgToday = sellAvg / sellLength;
+
+let avgPrices = [{buyAvg: buyAvgToday, sellAvg: sellAvgToday, symbol: symbol ,}]
+
+if(document == undefined || document.createdDate == undefined){
+    await docRef.set({
+        avgPrices: avgPrices,
+        createdDate: new Date()
+    });
+}
+else {
+    const diffTime = Math.abs(document.createdDate.toDate() - new Date());
+   
+    //a week has passed
+    if(Math.ceil(diffTime / (1000 * 60 * 60 * 24)) >= 6) {
+
+        let currencyAvg = document.avgPrices.find(c => c.symbol == symbol);
+
+        let buyDifference =  parseFloat(buyAvgToday) - parseFloat(currencyAvg.buyAvg);
+        let sellDifference = parseFloat(sellAvgToday) - parseFloat(currencyAvg.sellAvg);
+
+        return { buyDifference: buyDifference, sellDifference: sellDifference, currency: symbol};
+    }
+}
+
+return {buyDifference: null, sellDifference: null};
 }
 
 const getTypeOfChange = (newObj, oldObj, property) =>{
@@ -152,3 +181,4 @@ module.exports.addPrice = addPrice;
 module.exports.retrievePublicUrl = retrievePublicUrl;
 module.exports.addBank = addBank;
 module.exports.uploadFile = uploadFile;
+module.exports.getWeeklyDifference = getWeeklyDifference;
