@@ -39,7 +39,8 @@ const initNavigation = async () => {
 
    //  getCaribeExpressPrices(browser),
   let allPrices = await Promise.all([
-    getCaplaPrices(),
+   getCaplaPrices(),
+    getMarcosCambioPrices(),
    getPricesFromEmpire(browser),
     getjmmbPrices(browser),
     getCaribeExpressPrices(browser),
@@ -61,7 +62,6 @@ const initNavigation = async () => {
      getAsociacionNacionalPrices(browser),
      getPeraviaPrices(browser),
     getPricesFromBancoCentral(),
-    getMarcosCambioPrices(),
     getBhdLeonPrices(browser),
       getQuezadaPrices(browser),
       getAcnPrices(browser)
@@ -1180,7 +1180,10 @@ async function getMarcosCambioPrices(){
     for (let index = 0; index < paragraphs.length; index++) {
       const price = paragraphs[index];
       if(parseFloat(price.replace(",",".").match(regex)) > 0){
-         let parsedNumbersArr =  price.match(regexToIgnoreSeparators);
+         let parsedNumbersArr =   price.match(regexToIgnoreSeparators);
+         if(parsedNumbersArr[0].length == 3){
+            parsedNumbersArr[0] = parsedNumbersArr[0].substr(1);
+         }
          let parseNumber = parsedNumbersArr.join(".");
          pricesArr.push(parseFloat(parseNumber));
       }

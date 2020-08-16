@@ -10,6 +10,7 @@ const sendWeeklyNotifcation = async (differenceObj) =>{
     if(differenceObj.buyDifference == undefined ||  differenceObj.sellDifference){
         return;
     }
+   
 
     let currencyName = "dólar";
     switch(differenceObj.symbol){

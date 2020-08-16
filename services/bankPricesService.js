@@ -28,7 +28,7 @@ const addPrice = (bankPrice) => {
 const addBankPrices = async(bankPricesArr) => {
     for(let bank of bankPricesArr){
 
-        if(bank == undefined) continue;
+        if(bank == undefined || bank.error) continue;
         
         let docRef = db.collection('banks').doc(bank.name);
         let docData = await docRef.get();
@@ -132,12 +132,17 @@ else {
     const diffTime = Math.abs(document.createdDate.toDate() - new Date());
    
     //a week has passed
-    if(Math.ceil(diffTime / (1000 * 60 * 60 * 24)) >= 6) {
+    if(Math.ceil(diffTime / (1000 * 60 * 60 * 24)) >= 1) {
 
         let currencyAvg = document.avgPrices.find(c => c.symbol == symbol);
 
         let buyDifference =  parseFloat(buyAvgToday) - parseFloat(currencyAvg.buyAvg);
         let sellDifference = parseFloat(sellAvgToday) - parseFloat(currencyAvg.sellAvg);
+        
+        await docRef.set({
+            avgPrices: avgPrices,
+            createdDate: new Date()
+        });
 
         return { buyDifference: buyDifference, sellDifference: sellDifference, currency: symbol};
     }
