@@ -1165,7 +1165,7 @@ async function getMarcosCambioPrices(){
       textFromImage  = await parseImage(path);
   
       if(textFromImage == undefined) return "";
-      let hasDolarIdentifier = textFromImage.indexOf('#Dolares') > 0 && textFromImage.indexOf('Dolares') > 0;
+      let hasDolarIdentifier = textFromImage.indexOf('#Dolares') >= 0 && textFromImage.indexOf('Dolares') >= 0;
   
       if(hasDolarIdentifier) break;
     }
