@@ -9,7 +9,7 @@ class InstagramScrapper {
     async initPuppeter() {
         const puppeteer = require('puppeteer');
         this.browser = await puppeteer.launch({
-            headless: this.config.settings.headless,
+            headless: true,
             args: ['--no-sandbox'],
             userDataDir: "./user_data"
         });
@@ -52,6 +52,10 @@ class InstagramScrapper {
         await this.page.click(this.config.selectors.story_button_class);
         await this.page.waitFor(600);
 
+        // if(elementExist(this.page)){
+        //     var d = "aa";
+        // }
+        // //let cookiesLink = await this.page.click('body > div.RnEpo.Yx5HN > div > div > div > div.mt3GC > button.aOOlW.bIiDR');
 
         let imageLink = await this.page.$(this.config.selectors.story_img_class);
         let imagesrc = await this.page.evaluate(element => element.src, imageLink);
@@ -65,6 +69,16 @@ class InstagramScrapper {
        }
 
     }
+}
+
+async function elementExist(page){
+  try{
+    await page.$('body > div.RnEpo.Yx5HN > div > div > div > div.mt3GC > button.aOOlW.bIiDR');
+    return true;
+  }
+  catch(err){
+    return false;
+  }
 }
 
 module.exports = InstagramScrapper;
