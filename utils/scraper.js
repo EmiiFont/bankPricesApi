@@ -43,7 +43,6 @@ const initNavigation = async () => {
     getMarcosCambioPrices(),
     getPricesFromEmpire(browser),
     getjmmbPrices(browser),
-    getCaribeExpressPrices(browser),
     getBanReservasPrices(browser),
     getBancoPopularPrices(browser),
     getScotiaBankPrices(browser),
@@ -64,7 +63,7 @@ const initNavigation = async () => {
     getPricesFromBancoCentral(),
     getBhdLeonPrices(browser),
     getQuezadaPrices(browser),
-    getAcnPrices(browser)
+    getBonanzaPrices(browser)
   ].map(p => p.catch(error => {
     sentry.captureException(error);
     console.log(error);
@@ -1296,6 +1295,64 @@ let paragraphs = textFromImage.split("\n").join(" ").split(" ");
     return new BankPrice('capla', 0,0,0,0,[], true);
   }
 
+}
+
+const getBonanzaPrices = async(browser) =>{
+  try{
+
+    const page = await browser.newPage();
+  
+    await page.goto('https://www.bonanzabanco.com.do/')
+    
+    await page.setViewport({ width: 2752, height: 962 })
+    
+    await page.waitFor(1000)
+    
+    const dollarBuyElement = await page.$('.row > .col-md-6 > #topbar-search > .textwidget > marquee')
+    
+    const fullTextContents = await getTextContentForPrices(page, dollarBuyElement);
+    
+    const fullText = fullTextContents.split("  ");
+    
+    let pricesArr = [];
+
+    if(fullText.length > 0){
+       const textContainingPrices = fullText[0].split(" ");
+       pricesArr =getPricesFromArrayOfText(textContainingPrices);
+    }
+
+    let dollar = new CurrencyInfo(DOLLAR_SYMBOL, pricesArr[0], pricesArr[1]);
+    let currencies = [dollar];
+
+    const prices = new BankPrice('bonanza', pricesArr[0], pricesArr[1], 0, 0, currencies, false);
+    
+    await page.close();
+
+    return prices;
+
+}
+catch(error){
+  sentry.captureException(error);
+  console.log(error);
+  return new BankPrice('bonanza', 0,0,0,0,[], true);
+  }
+}
+
+function getPricesFromArrayOfText(textArr){
+  const regex = /[\d\.]+/;
+  const regexToIgnoreSeparators = /(\d|,)+/g;
+  const pricesArr = [];
+
+    for (let index = 0; index < textArr.length; index++) {
+      const price = textArr[index];
+      if(parseFloat(price.replace(",",".").match(regex)) > 0){
+         let parsedNumbersArr =  price.match(regexToIgnoreSeparators);
+         let parseNumber = parsedNumbersArr.join(".");
+         pricesArr.push(parseFloat(parseNumber));
+      }
+    }
+
+    return pricesArr;
 }
 
 module.exports.initNavigation = initNavigation;
