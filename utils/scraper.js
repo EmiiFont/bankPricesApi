@@ -13,8 +13,11 @@ const sentry = require('@sentry/node')
 const excelpar = require('../utils/excelParser')
 const functionPromise = require('../utils/functionUtilities');
 const { exception } = require('console');
+const InstagramScrapper = require('../utils/instagramScrapper');
 
 const path = './images/image.png';
+
+//TODO: can this be an enum in a file?
 const DOLLAR_SYMBOL = "US";
 const EURO_SYMBOL = "EU";
 const FRANC_SYMBOL = "CHF";
@@ -35,33 +38,36 @@ const initNavigation = async () => {
   const browser = await puppeteer.launch();
 
    //  getCaribeExpressPrices(browser),
-   // getAcnPrices(browser),
-   // getQuezadaPrices(browser),
   let allPrices = await Promise.all([
+    getCaplaPrices(),
+    getMarcosCambioPrices(),
     getPricesFromEmpire(browser),
     getjmmbPrices(browser),
     getBanReservasPrices(browser),
     getBancoPopularPrices(browser),
     getScotiaBankPrices(browser),
-     getBancoActivoPrices(browser),
-     getBancoBdiPrices(browser),
-     getBancoCaribePrices(browser),
-      getBanescoPrices(browser),
-      getPromericaPrices(browser),
-     getLopezDeHaroPrices(browser),
-     getBancoVimencaPrices(browser),
-     getBancoLafise(browser),
-     getAcnPrices(browser),
+    getBancoActivoPrices(browser),
+    getBancoBdiPrices(browser),
+    getBancoCaribePrices(browser),
+    getBanescoPrices(browser),
+    getPromericaPrices(browser),
+    getLopezDeHaroPrices(browser),
+    getBancoVimencaPrices(browser),
+    getBancoLafise(browser),
+    getAcnPrices(browser),
     getBancamericaPrices(browser),
     getBancoSantaCruzPrices(browser),
     getAsociacionAhorrosPrices(browser),
-     getAsociacionNacionalPrices(browser),
-     getPeraviaPrices(browser),
+    getAsociacionNacionalPrices(browser),
+    getPeraviaPrices(browser),
     getPricesFromBancoCentral(),
-    getMarcosCambioPrices(),
     getBhdLeonPrices(browser),
-    getProgesoPrices(browser)
-  ]);
+    getQuezadaPrices(browser),
+    getBonanzaPrices(browser)
+  ].map(p => p.catch(error => {
+    sentry.captureException(error);
+    console.log(error);
+  })));
 
   await browser.close();
 
@@ -317,6 +323,8 @@ const getBanescoPrices = async (browser) => {
 }
 
 const getCaribeExpressPrices = async (browser) => {
+  try{
+
   const page = await browser.newPage();
 
   await page.setViewport({ width: 1920, height: 937 });
@@ -344,6 +352,11 @@ const getCaribeExpressPrices = async (browser) => {
 
   await page.close();
   return prices;
+ }
+ catch(error){
+   return new BankPrice('caribeExpress', 0, 0, 0, 0, currencies, true);
+ }
+ 
 }
 
 const getBanReservasPrices = async (browser) => {
@@ -382,6 +395,8 @@ const getBanReservasPrices = async (browser) => {
     return prices;
   }
   catch (error) {
+    sentry.captureException(error);
+    console.log(error);
     return new BankPrice('banreservas', 0, 0, 0, 0, [], true);
   }
 }
@@ -825,21 +840,12 @@ const getQuezadaPrices = async (browser) => {
   try {
     const page = await browser.newPage();
 
-    await page.goto('http://agentedecambioquezada.com/', puppeteerPageConfig)
+    await page.goto('http://agentedecambioquezada.com/divisas.html', puppeteerPageConfig)
     await page.waitFor(2000);
 
     await page.setViewport({ width: 1920, height: 937 })
 
     await page.waitForSelector('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
-
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-ef > strong')
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-chk > strong')
-
-    await page.click('.blog-content-wrapper > .blog-content > ul > .da-chk > strong')
-    await page.click('.blog-content-wrapper > .blog-content > ul > .e-ef > strong')
-
-    await page.click('.twelve > .blog-content-wrapper > .blog-content > ul > .e-ef')
 
     const dollarElement = await page.$('.blog-content-wrapper > .blog-content > ul > .da-ef > strong');
     const euroElement = await page.$('.blog-content-wrapper > .blog-content > ul > .e-ef > strong');
@@ -1119,11 +1125,11 @@ const getPricesFromBancoCentral = async() =>{
 
 
 
-async function parseImage() {
+async function parseImage(imagePath) {
   const vision = require('@google-cloud/vision');
   const client = new vision.ImageAnnotatorClient();
 
-  let rest = await client.textDetection(path);
+  let rest = await client.textDetection(imagePath);
 
   return rest[0].textAnnotations[0].description;
 }
@@ -1145,32 +1151,50 @@ async function getMarcosCambioPrices(){
     const results = await client.get("statuses/user_timeline", {
       screen_name: "marcoscambioRD",
       exclude_replies: true,
-      count: 1
+      count: 3
     });
 
-    await pipeline(
-      got.stream(results[0].extended_entities.media[0].media_url),
-      fs.createWriteStream(path)
-  );
+    let textFromImage = "";
+    for(let i = 0; i < 3; i++){
+      await pipeline(
+        got.stream(results[i].extended_entities.media[0].media_url),
+        fs.createWriteStream(path)
+    );
+    
+      textFromImage  = await parseImage(path);
   
-    let textFromImage = await parseImage();
-
-    if(textFromImage == undefined) return "";
-    let hasDolarIdentifier = textFromImage.indexOf('#Dolares') > 0 && textFromImage.indexOf('Dolares') > 0;
-
-    if(!hasDolarIdentifier) throw exception("text in image in incorrect format");
+      if(textFromImage == undefined) return "";
+      let hasDolarIdentifier = textFromImage.indexOf('#Dolares') >= 0 && textFromImage.indexOf('Dolares') >= 0;
+  
+      if(hasDolarIdentifier) break;
+    }
     
     let text = textFromImage.substr(textFromImage.indexOf('Dolares'), textFromImage.length);
     let paragraphs = text.split('\n');
     const regex = /[\d\.]+/;
+    const regexToIgnoreSeparators = /(\d|,)+/g; //sometimes prices came as e.g: 12 33, 12,33 and 12.33
     
-    let dolarBuy = parseFloat(paragraphs[1].match(regex) || 0);
-    let dolarSell = parseFloat(paragraphs[2].match(regex) || 0);
-    let euroBuy = parseFloat(paragraphs[3].match(regex) || 0);
-    let euroSell = parseFloat(paragraphs[4].match(regex) || 0);
-    let francBuy = parseFloat(paragraphs[5].match(regex) || 0);
-    let cadBuy = parseFloat(paragraphs[6].match(regex) || 0);
-    let gbpBuy = parseFloat(paragraphs[7].replace(',','.').match(regex) || 0);
+
+    let pricesArr = [];
+    for (let index = 0; index < paragraphs.length; index++) {
+      const price = paragraphs[index];
+      if(parseFloat(price.replace(",",".").match(regex)) > 0){
+         let parsedNumbersArr =   price.match(regexToIgnoreSeparators);
+         if(parsedNumbersArr[0].length == 3){
+            parsedNumbersArr[0] = parsedNumbersArr[0].substr(1);
+         }
+         let parseNumber = parsedNumbersArr.join(".");
+         pricesArr.push(parseFloat(parseNumber));
+      }
+    }
+   
+    let dolarBuy = pricesArr[0];
+    let dolarSell = pricesArr[1];
+    let euroBuy = pricesArr[2];
+    let euroSell = pricesArr[3];
+    let francBuy = pricesArr[4];
+    let cadBuy = pricesArr[5];
+    let gbpBuy =pricesArr[6];
   
     let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dolarBuy, dolarSell);
     let euro = new CurrencyInfo(EURO_SYMBOL, euroBuy, euroSell);
@@ -1192,12 +1216,143 @@ async function getMarcosCambioPrices(){
 
 
 
-
-
-
 const getTextContentForPrices = async (page, priceElement) => {
   const price = await page.evaluate(element => element.textContent, priceElement);
   return price;
+}
+
+
+const getCaplaPrices = async () => {
+
+  try{
+
+  const pipeline = promisify(stream.pipeline);
+
+  const bot = new InstagramScrapper();
+
+  const startTime = Date();
+
+  await bot.initPuppeter().then(() => console.log("PUPPETEER INITIALIZED"));
+  
+  await bot.visitInstagramWithUserData().then(() => console.log("Instagram visited"));
+
+ let src =  await bot.visitCaplaRD();
+
+ if(src == "") return;
+
+ await bot.closeBrowser();
+
+ let httpSrc = src.replace("https", "http");
+
+ await pipeline(
+  got.stream(httpSrc),
+  fs.createWriteStream('./images/image2.png')
+);
+
+let textFromImage  = await parseImage('./images/image2.png');
+
+if(textFromImage == undefined) return;
+
+if(textFromImage.indexOf('MONEDA ACTUAL') < 0) return;
+
+let paragraphs = textFromImage.split("\n").join(" ").split(" ");
+    const regex = /[\d\.]+/;
+    const regexToIgnoreSeparators = /(\d|,)+/g;
+    
+    let pricesArr = [];
+    for (let index = 0; index < paragraphs.length; index++) {
+      const price = paragraphs[index];
+      if(parseFloat(price.replace(",",".").match(regex)) > 0){
+         let parsedNumbersArr =  price.match(regexToIgnoreSeparators);
+         let parseNumber = parsedNumbersArr.join(".");
+         pricesArr.push(parseFloat(parseNumber));
+      }
+    }
+ 
+    let dolarBuyCash = pricesArr[0];
+    let dolarSellCash = pricesArr[5];
+    let dolarBuyCheck = pricesArr[2];
+    let dolarBuyTransfer = pricesArr[3];
+    let dolarSellTransfer = pricesArr[7];
+
+    let euroBuyCash = pricesArr[1];
+    let euroSellCash = pricesArr[6];
+    let euroBuyTransfer = pricesArr[4];
+    let euroSellTransfer = pricesArr[8];
+ 
+  
+    let dollar = new CurrencyInfo(DOLLAR_SYMBOL, dolarBuyCash, dolarSellCash);
+    let euro = new CurrencyInfo(EURO_SYMBOL, euroBuyCash, euroSellCash);
+
+    let currencies = [dollar, euro];
+
+    const prices = new BankPrice('capla', dolarBuyCash, dolarSellCash, euroBuyCash, euroSellCash, currencies, false);
+    return prices;
+  }
+  catch(error){
+    sentry.captureException(error);
+    console.log(error);
+    return new BankPrice('capla', 0,0,0,0,[], true);
+  }
+
+}
+
+const getBonanzaPrices = async(browser) =>{
+  try{
+
+    const page = await browser.newPage();
+  
+    await page.goto('https://www.bonanzabanco.com.do/')
+    
+    await page.setViewport({ width: 2752, height: 962 })
+    
+    await page.waitFor(1000)
+    
+    const dollarBuyElement = await page.$('.row > .col-md-6 > #topbar-search > .textwidget > marquee')
+    
+    const fullTextContents = await getTextContentForPrices(page, dollarBuyElement);
+    
+    const fullText = fullTextContents.split("  ");
+    
+    let pricesArr = [];
+
+    if(fullText.length > 0){
+       const textContainingPrices = fullText[0].split(" ");
+       pricesArr =getPricesFromArrayOfText(textContainingPrices);
+    }
+
+    let dollar = new CurrencyInfo(DOLLAR_SYMBOL, pricesArr[0], pricesArr[1]);
+    let currencies = [dollar];
+
+    const prices = new BankPrice('bonanza', pricesArr[0], pricesArr[1], 0, 0, currencies, false);
+    
+    await page.close();
+
+    return prices;
+
+}
+catch(error){
+  sentry.captureException(error);
+  console.log(error);
+  return new BankPrice('bonanza', 0,0,0,0,[], true);
+  }
+}
+
+function getPricesFromArrayOfText(textArr){
+  const regex = /[\d\.]+/;
+  const regexToIgnoreSeparators = /(\d|,)+/g;
+  const pricesArr = [];
+
+    for (let index = 0; index < textArr.length; index++) {
+      const price = textArr[index];
+      if(parseFloat(price.replace(",",".").match(regex)) > 0){
+         let parsedNumbersArr =  price.match(regexToIgnoreSeparators);
+         let parseNumber = parsedNumbersArr.join(".");
+         pricesArr.push(parseFloat(parseNumber));
+      }
+    }
+
+    return pricesArr;
 }
 
 module.exports.initNavigation = initNavigation;

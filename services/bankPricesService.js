@@ -2,7 +2,8 @@
 
 const path = require('path');
 const admin = require('firebase-admin');
-const serviceAccount = require('../google-credentials.json');
+
+const serviceAccount = process.env.NODE_ENV == "development" ? require('../google-credentials-test.json') : require('../google-credentials.json');
 
 
 admin.initializeApp({
@@ -10,7 +11,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const bucket = admin.storage().bucket('gs://bankpricesstore.appspot.com');
+const bucket = process.env.NODE_ENV == "development" ? admin.storage().bucket('gs://bankpricestore-test.appspot.com') : admin.storage().bucket('gs://bankpricesstore.appspot.com');
 
 const config = {
     action: 'read',
@@ -27,7 +28,7 @@ const addPrice = (bankPrice) => {
 const addBankPrices = async(bankPricesArr) => {
     for(let bank of bankPricesArr){
 
-        if(bank == undefined) continue;
+        if(bank == undefined || bank.error) continue;
         
         let docRef = db.collection('banks').doc(bank.name);
         let docData = await docRef.get();
@@ -83,8 +84,72 @@ const addBankPrices = async(bankPricesArr) => {
     }
 }
 
+/** 
+ * Gets the weekly difference of the average price (buys and sells) from a currency
+ * 
+*/
+const getWeeklyDifference = async (bankPricesArr) => {
 
+let buyAvg = 0;
+let sellAvg = 0;
+let buyLength = 0;
+let sellLength = 0;
+const symbol = 'US';
 
+for(let bank of bankPricesArr){
+    if(bank === undefined) continue;
+
+    let avgCurrency = bank.currency.find(d => d.symbol == symbol);
+    
+    if(avgCurrency != undefined){
+        if(parseFloat(avgCurrency.buy) > 0){
+            buyAvg += parseFloat(avgCurrency.buy);
+            buyLength++;
+        }
+        if(parseFloat(avgCurrency.sell) > 0){
+            sellAvg += parseFloat(avgCurrency.sell);
+            sellLength++;
+        }
+    }
+}
+
+let docRef = db.collection('notifications').doc('weekly');
+let docData = await docRef.get();
+let document = docData.data();
+
+let buyAvgToday = buyAvg / buyLength;
+let sellAvgToday = sellAvg / sellLength;
+
+let avgPrices = [{buyAvg: buyAvgToday, sellAvg: sellAvgToday, symbol: symbol ,}]
+
+if(document == undefined || document.createdDate == undefined){
+    await docRef.set({
+        avgPrices: avgPrices,
+        createdDate: new Date()
+    });
+}
+else {
+    const diffTime = Math.abs(document.createdDate.toDate() - new Date());
+   
+    //a week has passed
+    if(Math.ceil(diffTime / (1000 * 60 * 60 * 24)) >= 1) {
+
+        let currencyAvg = document.avgPrices.find(c => c.symbol == symbol);
+
+        let buyDifference =  parseFloat(buyAvgToday) - parseFloat(currencyAvg.buyAvg);
+        let sellDifference = parseFloat(sellAvgToday) - parseFloat(currencyAvg.sellAvg);
+        
+        await docRef.set({
+            avgPrices: avgPrices,
+            createdDate: new Date()
+        });
+
+        return { buyDifference: buyDifference, sellDifference: sellDifference, currency: symbol};
+    }
+}
+
+return {buyDifference: null, sellDifference: null};
+}
 
 const getTypeOfChange = (newObj, oldObj, property) =>{
     return newObj[property] > oldObj[property] ? 'Increase' : newObj[property] == oldObj[property] ? 'Equal' : 'Decrease';
@@ -103,6 +168,8 @@ const uploadFile = async (filePath, bank) => {
     return url;
 }
 
+
+
 ///retrieve download url of the images in the bucket
 const retrievePublicUrl = async () => {
     let files = await bucket.getFiles();
@@ -119,3 +186,4 @@ module.exports.addPrice = addPrice;
 module.exports.retrievePublicUrl = retrievePublicUrl;
 module.exports.addBank = addBank;
 module.exports.uploadFile = uploadFile;
+module.exports.getWeeklyDifference = getWeeklyDifference;

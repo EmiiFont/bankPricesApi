@@ -1,0 +1,32 @@
+{
+    "base_url": "https://www.instagram.com",
+    "username": "divisasrd",
+    "password": "P@ssword.223",
+    "hashTags": ["cars","cat","soccer","javascript","places","football", "Motivation"],
+    "settings": {
+      "run_every_x_hours": 3,
+      "like_ratio": 0.75,
+      "unfollow_after_days": 2,
+      "headless": true
+    },
+    "selectors": {
+      "home_to_login_button": ".izU2O a",
+      "username_field": "input[type=\"text\"]",
+      "password_field": "input[type=\"password\"]",
+      "login_button": "button[type=\"submit\"]",
+      "post_heart_grey": "span.glyphsSpriteHeart__outline__24__grey_9",
+      "post_username": "div.e1e1d > h2.BrX75 > a",
+      "post_follow_link": ".bY2yH > button",
+      "post_like_button": "span.fr66n > button",
+      "post_follow_button": "span.oW_lN._1OSdk > button",
+      "post_close_button": "button.ckWGn",
+      "user_unfollow_button": "span.vBF20 > button._5f5mN",
+      "user_unfollow_confirm_button": "div.mt3GC > button.aOOlW.-Cab_",
+      "not_now_button": ".HoLwm",
+      "save_user_info": ".sqdOP",
+      "hash_tags_base_class": ".EZdmt",
+      "story_img_class": ".qbCDp > img",
+      "accept_cookies": ".aOOlW  bIiDR",
+      "story_button_class": ".h5uC0"
+    }
+  }

@@ -2,16 +2,15 @@
 
 const scraper = require('../utils/scraper');
 const bankService = require('../services/bankPricesService');
-const infoScraper = require('../utils/infoScraper');
+const notificationService = require('../services/notificationService');
 const bankNames = require('../utils/bankNames');
 const fs = require('fs');
 const path = require('path');
 
 exports.listPrices = async function(req, res){
 
-    //infoScraper.getBancoPopularInf();
     let logoUrls = await bankService.retrievePublicUrl();
-    
+
     bankNames.bankNames.forEach(bank =>{
         let url =logoUrls.find(c => c.name == bank.name);
         if(url != undefined)   {
@@ -25,6 +24,10 @@ exports.listPrices = async function(req, res){
         scraper.initNavigation()
         .then(data => {
             bankService.addBankPrices(data);
+            bankService.getWeeklyDifference(data).then((dd) => {
+                   notificationService.sendWeeklyNotifcation(dd);
+            });
+
             resolve(data);
         })
         .catch(err => reject('asociacion failed: ' + err))
@@ -34,3 +37,4 @@ exports.listPrices = async function(req, res){
         res.send(data);
     }).catch(err => res.status(500).send(err));
 }
+
