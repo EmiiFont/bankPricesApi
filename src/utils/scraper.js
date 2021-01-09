@@ -1294,7 +1294,6 @@ let paragraphs = textFromImage.split("\n").join(" ").split(" ");
     console.log(error);
     return new BankPrice('capla', 0,0,0,0,[], true);
   }
-
 }
 
 const getBonanzaPrices = async(browser) =>{
@@ -1329,8 +1328,8 @@ const getBonanzaPrices = async(browser) =>{
     await page.close();
 
     return prices;
-
 }
+
 catch(error){
   sentry.captureException(error);
   console.log(error);
