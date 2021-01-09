@@ -11,7 +11,7 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const bucket = process.env.NODE_ENV == "development" ? admin.storage().bucket('gs://bankpricestore-test.appspot.com') : admin.storage().bucket('gs://bankpricesstore.appspot.com');
+const bucket = process.env.NODE_ENV === "development" ? admin.storage().bucket('gs://bankpricestore-test.appspot.com') : admin.storage().bucket('gs://bankpricesstore.appspot.com');
 
 const config = {
     action: 'read',
@@ -28,7 +28,7 @@ const addPrice = (bankPrice) => {
 const addBankPrices = async(bankPricesArr) => {
     for(let bank of bankPricesArr){
 
-        if(bank == undefined || bank.error) continue;
+        if(bank === undefined || bank.error) continue;
         
         let docRef = db.collection('banks').doc(bank.name);
         let docData = await docRef.get();
@@ -37,7 +37,7 @@ const addBankPrices = async(bankPricesArr) => {
         let now = new Date();
         let yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
 
-        if(document != undefined){
+        if(document !== undefined){
             let lastPriceDoc;
              await docRef.collection('prices').where('date', '>=', yesterday.toISOString()).limit(1).get().then(function(querySnapshot) {
                 querySnapshot.forEach(function(doc) {
@@ -50,17 +50,17 @@ const addBankPrices = async(bankPricesArr) => {
                 console.log("Error getting documents: ", error);
             });
 
-            if(lastPriceDoc != undefined) {
-                if(lastPriceDoc.dollarBuy != undefined){
+            if(lastPriceDoc !== undefined) {
+                if(lastPriceDoc.dollarBuy !== undefined){
                     bank.USBuyChange = getTypeOfChange(bank, lastPriceDoc, 'dollarBuy');
                 }
-                if(lastPriceDoc.dollarSell != undefined){
+                if(lastPriceDoc.dollarSell !== undefined){
                     bank.USSellChange = getTypeOfChange(bank, lastPriceDoc, 'dollarSell');
                 }
-                if(lastPriceDoc.euroBuy != undefined){
+                if(lastPriceDoc.euroBuy !== undefined){
                     bank.EUBuyChange = getTypeOfChange(bank, lastPriceDoc, 'euroBuy');
                 }
-                if(lastPriceDoc.euroSell != undefined){
+                if(lastPriceDoc.euroSell !== undefined){
                     bank.EUSellChange = getTypeOfChange(bank, lastPriceDoc, 'euroSell');
                 }
             }; 
@@ -72,7 +72,7 @@ const addBankPrices = async(bankPricesArr) => {
             console.log(writeResult);
         });
         
-        if(document != undefined){
+        if(document !== undefined){
             docRef.update(JSON.parse(JSON.stringify(bank))).then((writeResult)=>{
                 console.log(writeResult);
             });

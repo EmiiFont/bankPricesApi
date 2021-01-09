@@ -1,5 +1,8 @@
 'use strict';
 
+import {CurrencyInfo} from "../models/currencyInfo";
+import {bankNames} from "./bankNames";
+
 const puppeteer = require('puppeteer');
 const https = require('https');
 const BankPrice = require('../models/bankprice');
@@ -23,16 +26,6 @@ const EURO_SYMBOL = "EU";
 const FRANC_SYMBOL = "CHF";
 const POUND_SYMBOL = "GBP";
 const CAD_SYMBOL = "CAD";
-
-class CurrencyInfo{
-  constructor(symbol, buy, sell){
-    this.symbol = symbol;
-    this.buy = buy;
-    this.sell = sell;
-  }
-}
-
-
 
 const initNavigation = async () => {
   const browser = await puppeteer.launch();
@@ -77,7 +70,6 @@ const initNavigation = async () => {
 const getAsociacionAhorrosPrices = async (browser) => {
 
   let prices = new BankPrice();//{'name': 'asociacion de ahorros y prestamos','dollarBuy': 0, 'dollarSell': 0, 'euroBuy': 0, 'dollarSell': 0};
-
   prices.name = 'asociacionPopular';
 
   try {
