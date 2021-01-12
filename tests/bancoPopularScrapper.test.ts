@@ -3,12 +3,12 @@ import {IBankPrice} from "../src/models/bankprice";
 
 const fakeData: IBankPrice = {euroSell: 1, euroBuy: 2, dollarBuy: 3,
     dollarSell: 4, name: "BancoPopular",
-    currency: null,
+    currency: [],
     EUBuyChange: "",
     EUSellChange: "",
     USBuyChange: "",
     USSellChange: "",
-    date: null, error: false }
+    date: new Date(), error: false }
 
 describe("BancoPopularScrapper", () =>{
     it("expect the scrapeData method to return the correct object", () => {

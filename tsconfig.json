@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "es5",
+    "target": "es2017",
     "sourceMap": true,
     "allowJs": true,
+    "outDir": "lib",
+    "strict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
     "noImplicitAny": false
   },
   "exclude": [

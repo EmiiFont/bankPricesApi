@@ -1,14 +1,14 @@
 import {IBankPrice} from "../models/bankprice";
 
 export abstract class ScrapperBaseHandler<T>{
-    bankName: string;
+    bankName: string= "empty";
 
     constructor() {
     }
 
     abstract scrapeData() : IBankPrice;
 
-    run() : IBankPrice {
+    run() : IBankPrice | null {
         try {
             console.log(`now scrapping ${(this.bankName)}`);
 
@@ -21,5 +21,7 @@ export abstract class ScrapperBaseHandler<T>{
         }catch (e) {
             console.log(e);
         }
+
+        return null;
     }
 }
