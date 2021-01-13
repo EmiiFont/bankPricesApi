@@ -7,4 +7,8 @@ export interface IBankInformation{
     locations: string[];
 }
 
-export type BankCategory = "creditUnion" | "agency" | "bank";
+export enum BankCategory{
+    CreditUnion="creditUnion",
+    Agency="agency",
+    Bank="bank"
+}

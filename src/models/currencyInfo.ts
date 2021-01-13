@@ -1,19 +1,27 @@
 export interface ICurrencyInfo{
-     symbol: currencySymbol;
+     symbol: CurrencySymbol;
      sell: number;
      buy: number;
 }
 
-export type currencySymbol= "US" | "EU" | "CHF" | "GBP" | "CAD";
+export enum CurrencySymbol {
+    US = "US",
+    EU = "EU",
+    CHF = "CHF",
+    GBP = "GBP",
+    CAD = "CAD"
+}
 
 export class CurrencyInfo{
-    private symbol: currencySymbol;
+    private symbol: CurrencySymbol;
     private sell: number;
     private buy: number;
-    constructor(symbol: currencySymbol, buy: number, sell: number){
+
+    constructor(symbol: CurrencySymbol, buy: number, sell: number){
         this.symbol = symbol;
         this.buy = buy;
         this.sell = sell;
     }
+
 }
 

@@ -1,5 +1,7 @@
 'use strict';
 
+import {BancoPopularScrapper} from "../utils/BancoPopularScrapper";
+
 const scraper = require('../utils/scraper');
 const bankService = require('../services/bankPricesService');
 const notificationService = require('../services/notificationService');
@@ -8,6 +10,9 @@ const fs = require('fs');
 const path = require('path');
 
 exports.listPrices = async function(req, res){
+
+    const bankPopular = new BancoPopularScrapper();
+    bankPopular.run();
 
     let logoUrls = await bankService.retrievePublicUrl();
 
