@@ -58,7 +58,6 @@ describe("utils",() =>{
 
         const expected = [58.0, 58.3];
         const result = parseDecimalFromArrayOfString(strArr);
-
         expect(result).toEqual(expected)
     });
 
