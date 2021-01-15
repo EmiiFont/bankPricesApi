@@ -1,21 +1,16 @@
 import {BancoPopularScrapper} from "../src/utils/BancoPopularScrapper";
-import {IBankPrice} from "../src/models/bankprice";
 
-const fakeData: IBankPrice = {euroSell: 1, euroBuy: 2, dollarBuy: 3,
-    dollarSell: 4, name: "BancoPopular",
-    currency: [],
-    EUBuyChange: "",
-    EUSellChange: "",
-    USBuyChange: "",
-    USSellChange: "",
-    date: new Date(), error: false }
+beforeAll(async () => {
+    await page.goto("http://google.com", {waitUntil: 'domcontentloaded'});
+});
 
-describe("BancoPopularScrapper", () =>{
-    it("expect the scrapeData method to return the correct object", () => {
+describe("BancoPopularScrapper",  () =>{
+    it("expect the scrapeData method to return the correct object", async () => {
+        jest.setTimeout(10000);
         let bps = new BancoPopularScrapper();
-        let spy = jest.spyOn(bps, 'scrapeData').mockImplementation(() => fakeData);
+        const result = await bps.scrapeData(page);
 
-        expect(bps.scrapeData()).toBe(fakeData);
-        expect(spy).toHaveBeenCalledTimes(1);
+        expect(bps.bankName).toBe("popular");
+        expect(result.euroBuy).toEqual(expect.any(Number));
     })
 })

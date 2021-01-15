@@ -23,5 +23,9 @@ export class CurrencyInfo{
         this.sell = sell;
     }
 
+    toReadable(): string{
+        return this.symbol + "" + this.sell + "" + this.buy;
+    }
+
 }
 
