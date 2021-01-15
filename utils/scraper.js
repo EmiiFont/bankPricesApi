@@ -1155,6 +1155,7 @@ async function getMarcosCambioPrices(){
     });
 
     let textFromImage = "";
+    let hasDolarIdentifier;
     for(let i = 0; i < 3; i++){
       await pipeline(
         got.stream(results[i].extended_entities.media[0].media_url),
@@ -1164,21 +1165,24 @@ async function getMarcosCambioPrices(){
       textFromImage  = await parseImage(path);
   
       if(textFromImage == undefined) return "";
-      let hasDolarIdentifier = textFromImage.indexOf('#Dolares') >= 0 && textFromImage.indexOf('Dolares') >= 0;
+      hasDolarIdentifier = textFromImage.indexOf('#Dolares') >= 0 && textFromImage.indexOf('Dolares') >= 0;
+      let hasDolarIdentifier2 = textFromImage.indexOf('Dolar') >= 0 && textFromImage.indexOf('Dolar $') >= 0;
   
-      if(hasDolarIdentifier) break;
+      if(hasDolarIdentifier || hasDolarIdentifier2) break;
     }
-    
-    let text = textFromImage.substr(textFromImage.indexOf('Dolares'), textFromImage.length);
+     
+    let text = hasDolarIdentifier ? textFromImage.substr(textFromImage.indexOf('Dolares'), textFromImage.length) : textFromImage.substring(textFromImage.indexOf('Compra'), textFromImage.length);
     let paragraphs = text.split('\n');
-    const regex = /[\d\.]+/;
+    const regexWithoutTextContinuing =/\d+\.\d{0,2}$/;
+    const rregexWitTextContinuing =/\d+\.\d{0,2}/;
     const regexToIgnoreSeparators = /(\d|,)+/g; //sometimes prices came as e.g: 12 33, 12,33 and 12.33
     
 
     let pricesArr = [];
     for (let index = 0; index < paragraphs.length; index++) {
-      const price = paragraphs[index];
-      if(parseFloat(price.replace(",",".").match(regex)) > 0){
+      const priceEmpty =  paragraphs[index].match(regexWithoutTextContinuing) || paragraphs[index].match(rregexWitTextContinuing); 
+      const price = priceEmpty !== null ? priceEmpty.join('') : "";
+      if(parseFloat(price.replace(",",".").match(regexWithoutTextContinuing)) > 0){
          let parsedNumbersArr =   price.match(regexToIgnoreSeparators);
          if(parsedNumbersArr[0].length == 3){
             parsedNumbersArr[0] = parsedNumbersArr[0].substr(1);
