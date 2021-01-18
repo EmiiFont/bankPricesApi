@@ -12,6 +12,14 @@ export const getValueForPrices = async (page: puppeteer.Page,
     return parseFloat(price || 0);
 }
 
+export async function getPriceFromSelector(page: puppeteer.Page, selector: string): Promise<number> {
+    await page.waitForSelector(selector);
+    const priceElement = await page.$(selector);
+
+    const nPrice = await getValueForPrices(page, priceElement);
+    return nPrice;
+}
+
 export function parseDecimalFromArrayOfString(stringArr: Array<string>): Array<number> {
     const regexToIgnoreSeparators = /(\d|,)+/g; //sometimes prices came as e.g: 12 33, 12,33 and 12.33
     const pricesArr: Array<number> = [];

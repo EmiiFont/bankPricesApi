@@ -7,12 +7,12 @@ export interface  IBankPrice{
   USSellChange?: string;
   USBuyChange?: string;
   name: string;
-  dollarBuy: number;
-  dollarSell: number;
-  euroBuy: number;
-  euroSell: number;
+  dollarBuy?: number;
+  dollarSell?: number;
+  euroBuy?: number;
+  euroSell?: number;
   error?: boolean;
-  currency: ICurrencyInfo[];
+  currency?: ICurrencyInfo[];
   date?: Date;
 }
 
