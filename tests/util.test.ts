@@ -1,7 +1,7 @@
 import {
     getTextContentForPrices,
     getValueForPrices,
-    parseDecimalFromArrayOfString
+    parseDecimalFromArrayOfString, parsePriceFromText
 } from "../src/utils/utils";
 
 describe("utils",() =>{
@@ -93,15 +93,9 @@ describe("utils",() =>{
         expect(result).toEqual(expected)
     });
 
-    //
-    // it("getPriceFromSelector should return a number when successful return of string", async () =>{
-    //     jest.setTimeout(10000);
-    //     jest.spyOn(page, 'waitForSelector').mockImplementation(() => new Promise(() => "50.60"))
-    //         .mockResolvedValue(null);
-    //     jest.spyOn(page, '$').mockImplementation()
-    //         .mockResolvedValue(new Promise(() => "50.60"));
-    //     const result = await getPriceFromSelector(page, "");
-    //     expect(result).toEqual(50.60);
-    //
-    // })
+
+    it("parsePriceFromText should return a number when successful return of string", async () =>{
+        const result = parsePriceFromText("Venta 58.40 compra");
+        expect(result).toEqual("58.40");
+    })
 })

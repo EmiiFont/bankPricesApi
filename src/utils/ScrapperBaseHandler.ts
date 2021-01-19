@@ -2,7 +2,7 @@ import {IBankPrice} from "../models/bankprice";
 import * as puppeteer from 'puppeteer';
 import * as sentry from '@sentry/node';
 import {DirectNavigationOptions} from "puppeteer";
-import {getValueForPrices} from "./utils";
+import {getTextContentForPrices, getValueForPrices} from "./utils";
 import { CurrencySymbol, ICurrencyInfo} from "../models/currencyInfo";
 import {CurrencyElementHolder} from "../types/CurrencyElementHolder";
 
@@ -59,6 +59,9 @@ export abstract class ScrapperBaseHandler<T>{
         if(this.page !== undefined){
             const priceElement = await this.page.$(selector);
             nPrice = await getValueForPrices(page, priceElement);
+            if(nPrice === 0){
+                nPrice = await getTextContentForPrices(page, priceElement);
+            }
         }
         return nPrice;
     }
