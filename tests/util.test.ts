@@ -93,6 +93,35 @@ describe("utils",() =>{
         expect(result).toEqual(expected)
     });
 
+    it("parseDecimalFromArrayOfString should return array from banesco format", async () =>{
+
+        const text = "USD$ - C RD$57.25 V RD$ 58.45 EU$ - C RD$67.83  V RD$72.97 - Estas tasas son de referencia."
+        ;
+        const strArr = text.split("RD$");
+
+        const expected = [57.25, 58.45, 67.83, 72.97];
+        const result = parseDecimalFromArrayOfString(strArr);
+
+        expect(result).toEqual(expected)
+    });
+
+    it("parseDecimalFromArrayOfString should return array from lopez de haro format", async () =>{
+
+        const text: any = "\"—————COMPRA—-VENTA\n" +
+            "DÓLAR—-57.40———58.45\n" +
+            "EUROS—-69.00———72.70 \""
+        ;
+        const strArr = text.replace(new RegExp("———", 'g'), " ")
+            .replace(new RegExp("—-", 'g'), " ")
+            .replace(new RegExp("———", 'g'), " ").split(" ");
+
+
+        const expected = [57.4, 58.45, 69, 72.7];
+        const result = parseDecimalFromArrayOfString(strArr);
+
+        expect(result).toEqual(expected)
+    });
+
 
     it("parsePriceFromText should return a number when successful return of string", async () =>{
         const result = parsePriceFromText("Venta 58.40 compra");
