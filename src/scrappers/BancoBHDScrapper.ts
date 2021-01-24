@@ -4,7 +4,8 @@ import { IBankPrice } from '../models/bankprice';
 import { Banks } from '../models/bankName';
 import { CurrencySymbol } from '../models/currencyInfo';
 
-class BancoBHDScrapper extends ScrapperBaseHandler<BancoBHDScrapper> {
+// @ts-ignore
+export class BancoBHDScrapper extends ScrapperBaseHandler<BancoBHDScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.BHDLeon;
     this.usBuyElement = '#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(2)';

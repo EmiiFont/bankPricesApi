@@ -1,48 +1,36 @@
 'use strict';
 
-import { BancoPopularScrapper } from '../scrappers';
 import * as puppeteer from 'puppeteer';
+import { ScrapperFacade } from '../scrappers/ScrapperFacade';
+import { addBank, addBankPrices, retrievePublicUrl } from '../services/bankPricesService';
+import { bankNames } from '../utils/bankNames';
 
-const scraper = require('../utils/scraper');
-const bankService = require('../services/bankPricesService');
-const notificationService = require('../services/notificationService');
-const bankNames = require('../utils/bankNames');
+// const scraper = require('../utils/scraper');
+// const notificationService = require('../services/notificationService');
+// const bankNames = require('../utils/bankNames');
 
-exports.listPrices = async function (req, res) {
+export async function listPrices(req, res) {
   const browser = await puppeteer.launch();
-  const bankPopular = new BancoPopularScrapper();
-  const popularPrice = await bankPopular.run(browser);
 
-  console.log(popularPrice);
+  const facade = new ScrapperFacade();
+  const bankPrices = await facade.execute(browser);
 
-  let logoUrls = await bankService.retrievePublicUrl();
+  try {
+    let logoUrls = await retrievePublicUrl();
 
-  bankNames.bankNames.forEach((bank) => {
-    let url = logoUrls.find((c) => c.name == bank.name);
-    if (url != undefined) {
-      bank.imageUrl = url.url;
-    }
-    bankService.addBank(bank);
-  });
+    bankNames.forEach((bank) => {
+      let url = logoUrls.find((c) => c.name == bank.name);
+      if (url != undefined) {
+        bank.imageUrl = url.url;
+      }
+      addBank(bank);
+    });
 
-  //scraper.initNavigation();
-  const asociacionAhorros = new Promise((resolve, reject) => {
-    scraper
-      .initNavigation()
-      .then((data) => {
-        bankService.addBankPrices(data);
-        bankService.getWeeklyDifference(data).then((dd) => {
-          notificationService.sendWeeklyNotifcation(dd);
-        });
-
-        resolve(data);
-      })
-      .catch((err) => reject('asociacion failed: ' + err));
-  });
-
-  asociacionAhorros
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => res.status(500).send(err));
-};
+    await addBankPrices(bankPrices);
+    //let weekly = await getWeeklyDifference(bankPrices);
+    //notificationService.sendWeeklyNotifcation(weekly);
+    res.send(bankPrices);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+}

@@ -5,7 +5,8 @@ import { Banks } from '../models/bankName';
 import { CurrencySymbol } from '../models/currencyInfo';
 import { getTextContentForPrices } from '../utils/utils';
 
-class BancoEmpireScrapper extends ScrapperBaseHandler<BancoEmpireScrapper> {
+// @ts-ignore
+export class BancoEmpireScrapper extends ScrapperBaseHandler<BancoEmpireScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.BancoEmpire;
 

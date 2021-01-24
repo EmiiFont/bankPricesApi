@@ -5,8 +5,8 @@ import * as puppeteer from 'puppeteer';
 import { Banks } from '../models/bankName';
 
 export class BancoPopularScrapper extends ScrapperBaseHandler<BancoPopularScrapper> {
+  bankName = Banks.BancoPopular;
   async scrapeData(page: puppeteer.Page): Promise<IBankPrice> {
-    this.bankName = Banks.BancoPopular;
     this.usBuyElement = '#tasa_dolar_desktop #compra_peso_dolar_desktop';
     this.usSellElement = '#tasa_dolar_desktop #venta_peso_dolar_desktop';
     this.euBuyElement = '#tasa_euro_desktop #compra_peso_euro_desktop';

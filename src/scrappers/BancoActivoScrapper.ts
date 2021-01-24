@@ -25,7 +25,7 @@ export class BancoActivoScrapper extends ScrapperBaseHandler<BancoActivoScrapper
       },
     ];
 
-    await page.goto('https://www.banesco.com.do/', this.puppeteerPageConfig);
+    await page.goto('https://www.bancoactivo.com.do/tasas-tarifas.html', this.puppeteerPageConfig);
 
     return await this.getPrices();
   }

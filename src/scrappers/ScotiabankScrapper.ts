@@ -4,16 +4,13 @@ import { IBankPrice } from '../models/bankprice';
 import { Banks } from '../models/bankName';
 import { CurrencySymbol } from '../models/currencyInfo';
 
-// @ts-ignore
-export class BancoJmmbScrapper extends ScrapperBaseHandler<BancoJmmbScrapper> {
+export class ScotiabankScrapper extends ScrapperBaseHandler<ScotiabankScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.Jmmb;
-    this.usBuyElement =
-      '.table-wrapper:nth-child(3) > .main-table > tbody > tr:nth-child(3) > td:nth-child(2)';
-    this.usSellElement = '.table-wrapper > .main-table > tbody > tr:nth-child(3) > td:nth-child(3)';
-    this.euBuyElement =
-      '.table-wrapper:nth-child(3) > .main-table > tbody > tr:nth-child(4) > td:nth-child(2)';
-    this.euSellElement = '.table-wrapper > .main-table > tbody > tr:nth-child(4) > td:nth-child(3)';
+    this.bankName = Banks.ScotiaBank;
+    this.usBuyElement = '._bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(3)';
+    this.usSellElement = '._bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(4)';
+    this.euBuyElement = '._bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(3)';
+    this.euSellElement = '._bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(4)';
 
     this.currenciesElements = [
       {
@@ -29,10 +26,11 @@ export class BancoJmmbScrapper extends ScrapperBaseHandler<BancoJmmbScrapper> {
     ];
 
     await page.goto(
-      'https://do-bank.jmmb.com/es/tasas-de-referencia#tasadecambio',
+      'https://do.scotiabank.com/banca-personal/tarifas/tasas-de-cambio.html',
       this.puppeteerPageConfig,
     );
 
+    //let us = await this.getUSPrices();
     return await this.getPrices();
   }
 }

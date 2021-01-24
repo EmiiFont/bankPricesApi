@@ -29,17 +29,18 @@ export abstract class ScrapperBaseHandler<T> {
 
   async run(browser: puppeteer.Browser): Promise<IBankPrice | null> {
     try {
-      console.log(`now scrapping ${this.bankName}`);
+      ScrapperBaseHandler.logInfo(`now scrapping ${this.bankName}`);
 
       this.page = await browser.newPage();
 
-      await page.setViewport({ width: 1920, height: 888 });
+      await this.page.setViewport({ width: 1920, height: 888 });
 
-      let iBankPrice = this.scrapeData(page);
+      let iBankPrice = await this.scrapeData(this.page);
 
-      console.log(`finished scrapping ${this.bankName}`);
+      ScrapperBaseHandler.logInfo(`finished scrapping ${this.bankName} 
+      result: ${JSON.stringify(iBankPrice)}`);
 
-      await page.close();
+      await this.page.close();
 
       return iBankPrice;
     } catch (e) {
@@ -50,17 +51,22 @@ export abstract class ScrapperBaseHandler<T> {
     return null;
   }
 
+  private static logInfo(message: string): void {
+    console.log(message);
+    sentry.captureMessage(message);
+  }
+
   protected async getPriceFromSelector(selector: string | undefined): Promise<number> {
     if (selector == undefined) return 0;
 
-    await page.waitForSelector(selector);
+    await this.page?.waitForSelector(selector);
 
     let nPrice = 0;
     if (this.page !== undefined) {
       const priceElement = await this.page.$(selector);
-      nPrice = await getValueForPrices(page, priceElement);
+      nPrice = await getValueForPrices(this.page, priceElement);
       if (nPrice === 0) {
-        nPrice = await getTextContentForPrices(page, priceElement);
+        nPrice = await getTextContentForPrices(this.page, priceElement);
       }
     }
     return nPrice;
@@ -111,30 +117,16 @@ export abstract class ScrapperBaseHandler<T> {
       currencyInfoArr.push({ symbol: b.symbol, buy: buy, sell: sell });
     }
 
-    const dollar = currencyInfoArr?.find((b) => b.symbol == 'US');
-    const euro = currencyInfoArr?.find((b) => b.symbol == 'EU');
-
     return {
       name: this.bankName,
-      dollarBuy: dollar?.buy,
-      dollarSell: dollar?.sell,
-      euroBuy: euro?.buy,
-      euroSell: euro?.sell,
       currency: currencyInfoArr,
       error: false,
     };
   }
 
   protected async getPricesFromArray(currencyInfoArr: Array<ICurrencyInfo>): Promise<IBankPrice> {
-    const dollar = currencyInfoArr?.find((b) => b.symbol == 'US');
-    const euro = currencyInfoArr?.find((b) => b.symbol == 'EU');
-
     return {
       name: this.bankName,
-      dollarBuy: dollar?.buy,
-      dollarSell: dollar?.sell,
-      euroBuy: euro?.buy,
-      euroSell: euro?.sell,
       currency: currencyInfoArr,
       error: false,
     };

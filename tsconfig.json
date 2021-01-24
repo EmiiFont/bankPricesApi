@@ -12,11 +12,12 @@
     ],
     "sourceMap": true,
     "allowJs": true,
-    "outDir": "lib",
+    "outDir": "./dist",
     "strict": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "resolveJsonModule": true
   },
   "exclude": [
     "node_modules"

@@ -3,7 +3,8 @@ import { Page } from 'puppeteer';
 import { IBankPrice } from '../models/bankprice';
 import { Banks } from '../models/bankName';
 
-class AsociacionAhorrosScrapper extends ScrapperBaseHandler<AsociacionAhorrosScrapper> {
+// @ts-ignore
+export class AsociacionAhorrosScrapper extends ScrapperBaseHandler<AsociacionAhorrosScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.AsociacionPopular;
 

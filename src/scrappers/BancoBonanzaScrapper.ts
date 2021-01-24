@@ -5,7 +5,8 @@ import { Banks } from '../models/bankName';
 import { CurrencySymbol } from '../models/currencyInfo';
 import { parseDecimalFromArrayOfString } from '../utils/utils';
 
-class BancoBonanzaScrapper extends ScrapperBaseHandler<BancoBonanzaScrapper> {
+// @ts-ignore
+export class BancoBonanzaScrapper extends ScrapperBaseHandler<BancoBonanzaScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.Bonanza;
     this.usBuyElement = '.row > .col-md-6 > #topbar-search > .textwidget > marquee';

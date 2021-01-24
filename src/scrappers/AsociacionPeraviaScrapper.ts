@@ -4,7 +4,8 @@ import { IBankPrice } from '../models/bankprice';
 import { Banks } from '../models/bankName';
 import { CurrencySymbol } from '../models/currencyInfo';
 
-class AsociacionPeraviaScrapper extends ScrapperBaseHandler<AsociacionPeraviaScrapper> {
+// @ts-ignore
+export class AsociacionPeraviaScrapper extends ScrapperBaseHandler<AsociacionPeraviaScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.BancoPeravia;
     this.usBuyElement = '.row > .col-sm-8 > .tasas > .compra:nth-child(2) > strong';

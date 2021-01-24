@@ -86,7 +86,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
-bankpricesstore-firebase-cred.json
+google-credentials.json
 
 assets/activo.png
 assets/asociacionNacional.jpg
@@ -114,21 +114,12 @@ assets/bancamerica.jpg
 assets/asociacionlanacional.jpg
 assets/acn.png
 assets/0.png
-google-credentials.json
 google-credentials-test.json
-bancocentraltasasother.xls
 bancocentraltasasus.xls
 bancocentraltasasother.xls
-bancocentraltasasus.xls
 images/image.png
-bancocentraltasasother.xls
-bancocentraltasasus.xls
 user_data/
 images/image2.png
-bancocentraltasasus.xls
-bancocentraltasasother.xls
-bancocentraltasasother.xls
-bancocentraltasasus.xls
 .idea/vcs.xml
 .idea/modules.xml
 .idea/bankPricesApi.iml

@@ -8,7 +8,8 @@ import * as fs from 'fs';
 import { readDownloadedExcel } from '../utils/excelParser';
 import { promiseForStream } from '../utils/functionUtilities';
 
-class BancoCentralScrapper extends ScrapperBaseHandler<BancoCentralScrapper> {
+// @ts-ignore
+export class BancoCentralScrapper extends ScrapperBaseHandler<BancoCentralScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.BancoCentral;
 
