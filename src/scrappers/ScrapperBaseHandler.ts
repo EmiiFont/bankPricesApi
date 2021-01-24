@@ -1,29 +1,27 @@
-import { IBankPrice } from '../models/bankprice';
-import * as puppeteer from 'puppeteer';
-import { DirectNavigationOptions } from 'puppeteer';
-import * as sentry from '@sentry/node';
-import { getTextContentForPrices, getValueForPrices } from '../utils/utils';
-import { CurrencySymbol, ICurrencyInfo } from '../models/currencyInfo';
-import { CurrencyElementHolder } from '../types/CurrencyElementHolder';
+import { IBankPrice } from "../models/bankprice";
+import * as puppeteer from "puppeteer";
+import { DirectNavigationOptions } from "puppeteer";
+import * as sentry from "@sentry/node";
+import { getTextContentForPrices, getValueForPrices } from "../utils/utils";
+import { CurrencySymbol, ICurrencyInfo } from "../models/currencyInfo";
+import { CurrencyElementHolder } from "../types/CurrencyElementHolder";
 
 export abstract class ScrapperBaseHandler<T> {
   page: puppeteer.Page | undefined;
-  bankName: string = 'empty';
+  bankName = "empty";
   currenciesElements: Array<CurrencyElementHolder> = [];
-  usBuyElement: string = '';
-  usSellElement: string = '';
-  euBuyElement: string = '';
-  euSellElement: string = '';
-  gbpBuyElement: string = '';
-  gbpSellElement: string = '';
-  cadBuyElement: string = '';
-  cadSellElement: string = '';
-  chfBuyElement: string = '';
-  chfSellElement: string = '';
+  usBuyElement = "";
+  usSellElement = "";
+  euBuyElement = "";
+  euSellElement = "";
+  gbpBuyElement = "";
+  gbpSellElement = "";
+  cadBuyElement = "";
+  cadSellElement = "";
+  chfBuyElement = "";
+  chfSellElement = "";
 
-  puppeteerPageConfig: DirectNavigationOptions = { waitUntil: 'domcontentloaded', timeout: 0 };
-
-  constructor() {}
+  puppeteerPageConfig: DirectNavigationOptions = { waitUntil: "domcontentloaded", timeout: 0 };
 
   protected abstract scrapeData(page: puppeteer.Page): Promise<IBankPrice>;
 
@@ -35,7 +33,7 @@ export abstract class ScrapperBaseHandler<T> {
 
       await this.page.setViewport({ width: 1920, height: 888 });
 
-      let iBankPrice = await this.scrapeData(this.page);
+      const iBankPrice = await this.scrapeData(this.page);
 
       ScrapperBaseHandler.logInfo(`finished scrapping ${this.bankName} 
       result: ${JSON.stringify(iBankPrice)}`);
@@ -108,7 +106,7 @@ export abstract class ScrapperBaseHandler<T> {
   }
 
   protected async getPrices(): Promise<IBankPrice> {
-    let currencyInfoArr: Array<ICurrencyInfo> = [];
+    const currencyInfoArr: Array<ICurrencyInfo> = [];
 
     for (const b of this.currenciesElements) {
       const buy = await this.getPriceFromSelector(b.buyElement);

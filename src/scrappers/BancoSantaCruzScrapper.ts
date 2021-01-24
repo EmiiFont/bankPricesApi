@@ -1,22 +1,18 @@
-import { ScrapperBaseHandler } from './ScrapperBaseHandler';
-import { Page } from 'puppeteer';
-import { IBankPrice } from '../models/bankprice';
-import { Banks } from '../models/bankName';
-import { CurrencySymbol, ICurrencyInfo } from '../models/currencyInfo';
+import { ScrapperBaseHandler } from "./ScrapperBaseHandler";
+import { Page } from "puppeteer";
+import { IBankPrice } from "../models/bankprice";
+import { Banks } from "../models/bankName";
+import { CurrencySymbol, ICurrencyInfo } from "../models/currencyInfo";
 
-// @ts-ignore
 export class BancoSantaCruzScrapper extends ScrapperBaseHandler<BancoSantaCruzScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.SantaCruz;
 
-    await page.goto(
-      'https://www.bsc.com.do/dynresources/wj/bsc/v1/divisas',
-      this.puppeteerPageConfig,
-    );
+    await page.goto("https://www.bsc.com.do/dynresources/wj/bsc/v1/divisas", this.puppeteerPageConfig);
 
-    let parsedJson = await page.evaluate(() => {
-      const body = document.querySelector('body');
-      return JSON.parse(body != null ? body.innerText : '');
+    const parsedJson = await page.evaluate(() => {
+      const body = document.querySelector("body");
+      return JSON.parse(body != null ? body.innerText : "");
     });
 
     const usd = parsedJson.usd;

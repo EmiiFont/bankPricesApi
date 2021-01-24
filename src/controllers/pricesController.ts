@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
-import * as puppeteer from 'puppeteer';
-import { ScrapperFacade } from '../scrappers/ScrapperFacade';
-import { addBank, addBankPrices, retrievePublicUrl } from '../services/bankPricesService';
-import { bankNames } from '../utils/bankNames';
+import * as puppeteer from "puppeteer";
+import { ScrapperFacade } from "../scrappers/ScrapperFacade";
+import { addBank, addBankPrices, retrievePublicUrl } from "../services/bankPricesService";
+import { bankNames } from "../utils/bankNames";
 
 // const scraper = require('../utils/scraper');
 // const notificationService = require('../services/notificationService');
@@ -16,10 +16,10 @@ export async function listPrices(req, res) {
   const bankPrices = await facade.execute(browser);
 
   try {
-    let logoUrls = await retrievePublicUrl();
+    const logoUrls = await retrievePublicUrl();
 
     bankNames.forEach((bank) => {
-      let url = logoUrls.find((c) => c.name == bank.name);
+      const url = logoUrls.find((c) => c.name == bank.name);
       if (url != undefined) {
         bank.imageUrl = url.url;
       }
@@ -27,8 +27,8 @@ export async function listPrices(req, res) {
     });
 
     await addBankPrices(bankPrices);
-    //let weekly = await getWeeklyDifference(bankPrices);
-    //notificationService.sendWeeklyNotifcation(weekly);
+    // let weekly = await getWeeklyDifference(bankPrices);
+    // notificationService.sendWeeklyNotifcation(weekly);
     res.send(bankPrices);
   } catch (e) {
     res.status(500).send(e);

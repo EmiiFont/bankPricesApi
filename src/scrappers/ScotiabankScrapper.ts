@@ -1,16 +1,16 @@
-import { ScrapperBaseHandler } from './ScrapperBaseHandler';
-import { Page } from 'puppeteer';
-import { IBankPrice } from '../models/bankprice';
-import { Banks } from '../models/bankName';
-import { CurrencySymbol } from '../models/currencyInfo';
+import { ScrapperBaseHandler } from "./ScrapperBaseHandler";
+import { Page } from "puppeteer";
+import { IBankPrice } from "../models/bankprice";
+import { Banks } from "../models/bankName";
+import { CurrencySymbol } from "../models/currencyInfo";
 
 export class ScotiabankScrapper extends ScrapperBaseHandler<ScotiabankScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.ScotiaBank;
-    this.usBuyElement = '._bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(3)';
-    this.usSellElement = '._bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(4)';
-    this.euBuyElement = '._bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(3)';
-    this.euSellElement = '._bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(4)';
+    this.usBuyElement = "._bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(3)";
+    this.usSellElement = "._bns--table > .bns--table > tbody > tr:nth-child(2) > td:nth-child(4)";
+    this.euBuyElement = "._bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(3)";
+    this.euSellElement = "._bns--table > .bns--table > tbody > tr:nth-child(4) > td:nth-child(4)";
 
     this.currenciesElements = [
       {
@@ -25,12 +25,9 @@ export class ScotiabankScrapper extends ScrapperBaseHandler<ScotiabankScrapper> 
       },
     ];
 
-    await page.goto(
-      'https://do.scotiabank.com/banca-personal/tarifas/tasas-de-cambio.html',
-      this.puppeteerPageConfig,
-    );
+    await page.goto("https://do.scotiabank.com/banca-personal/tarifas/tasas-de-cambio.html", this.puppeteerPageConfig);
 
-    //let us = await this.getUSPrices();
+    // let us = await this.getUSPrices();
     return await this.getPrices();
   }
 }

@@ -1,4 +1,4 @@
-import { ICurrencyInfo } from './currencyInfo';
+import { ICurrencyInfo } from "./currencyInfo";
 
 export interface IBankPrice {
   EUSellChange?: string;

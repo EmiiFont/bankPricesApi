@@ -1,6 +1,6 @@
-'use strict';
-import { listPrices } from '../controllers/pricesController';
+"use strict";
+import { listPrices } from "../controllers/pricesController";
 
 export function routes(app) {
-  app.route('/prices').get(listPrices);
+  app.route("/prices").get(listPrices);
 }

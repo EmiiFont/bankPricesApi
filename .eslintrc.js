@@ -8,6 +8,8 @@ module.exports = {
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
     "google",
   ],
@@ -17,10 +19,17 @@ module.exports = {
     sourceType: "module",
   },
   ignorePatterns: [
-    "/lib/**/*", // Ignore built files.
+    "/lib/**/*",
+    "/tests/**/*", // Ignore built files.
   ],
-  plugins: ["@typescript-eslint", "import"],
+  plugins: ["@typescript-eslint", "import", "prettier"],
   rules: {
     quotes: ["error", "double"],
+    "require-jsdoc": "off",
+    "valid-jsdoc": "off",
+    "max-len": "off",
+    "object-curly-spacing": "off",
+    indent: "off",
+    "operator-linebreak": "off",
   },
 };

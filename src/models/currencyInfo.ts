@@ -6,12 +6,12 @@ export interface ICurrencyInfo {
   buyChange?: ChangeType;
 }
 
-export type ChangeType = 'change' | 'increase' | 'decrease';
+export type ChangeType = "change" | "increase" | "decrease";
 
 export enum CurrencySymbol {
-  US = 'US',
-  EU = 'EU',
-  CHF = 'CHF',
-  GBP = 'GBP',
-  CAD = 'CAD',
+  US = "US",
+  EU = "EU",
+  CHF = "CHF",
+  GBP = "GBP",
+  CAD = "CAD",
 }

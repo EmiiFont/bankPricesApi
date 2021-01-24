@@ -1,39 +1,39 @@
-import * as admin from 'firebase-admin';
+import * as admin from "firebase-admin";
 
 const sendWeeklyNotifcation = async (differenceObj) => {
   if (differenceObj.buyDifference == undefined || differenceObj.sellDifference) {
     return;
   }
 
-  let currencyName = 'dólar';
+  let currencyName = "dólar";
   switch (differenceObj.symbol) {
-    case 'US':
-      currencyName = 'dólar';
+    case "US":
+      currencyName = "dólar";
       break;
-    case 'EU':
-      currencyName = 'euro';
+    case "EU":
+      currencyName = "euro";
       break;
-    case 'CAD':
-      currencyName = 'dólar canadiense';
+    case "CAD":
+      currencyName = "dólar canadiense";
       break;
   }
 
-  let message =
+  const message =
     differenceObj.buyDifference < 0
       ? `La compra del ${currencyName} ha disminuido en promedio ${differenceObj.buyDifference}`
       : `La compra del ${currencyName} ha aumentado en promedio  ${differenceObj.buyDifference}`;
 
-  let message2 =
+  const message2 =
     differenceObj.sellDifference < 0
       ? `La venta del ${currencyName} ha disminuido en promedio ${differenceObj.sellDifference}`
       : `La venta del ${currencyName} ha aumentado en promedio  ${differenceObj.sellDifference}`;
 
   const fcmMessage = {
     notification: {
-      body: message + '\n' + message2,
-      title: 'Cambios esta semana',
+      body: message + "\n" + message2,
+      title: "Cambios esta semana",
     },
-    topic: 'weekly',
+    topic: "weekly",
   };
 
   retrieveRegisteredDevices();
@@ -41,7 +41,7 @@ const sendWeeklyNotifcation = async (differenceObj) => {
 };
 
 const retrieveRegisteredDevices = async () => {
-  let tokens = [];
+  const tokens = [];
 
   // let td = await db.collection("fcmTokens").get();
   //
@@ -49,7 +49,7 @@ const retrieveRegisteredDevices = async () => {
   //   tokens.push(doc.id);
   //  });
 
-  admin.messaging().subscribeToTopic(tokens, 'weekly');
+  admin.messaging().subscribeToTopic(tokens, "weekly");
 };
 
 const sendPushNotification = (message) => {

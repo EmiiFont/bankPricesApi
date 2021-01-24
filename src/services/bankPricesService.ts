@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
-import { IBankPrice } from '../models/bankprice';
+import { IBankPrice } from "../models/bankprice";
 
-import * as path from 'path';
-import * as admin from 'firebase-admin';
-import { ServiceAccount } from 'firebase-admin';
-import * as serviceAccount from '../../google-credentials-test.json';
+import * as path from "path";
+import * as admin from "firebase-admin";
+import { ServiceAccount } from "firebase-admin";
+import * as serviceAccount from "../../google-credentials-test.json";
 import DocumentData = admin.firestore.DocumentData;
 
 // const serviceAccount =
@@ -24,13 +24,13 @@ admin.initializeApp({
 
 const db = admin.firestore();
 const bucket =
-  process.env.NODE_ENV === 'development'
-    ? admin.storage().bucket('gs://bankpricestore-test.appspot.com')
-    : admin.storage().bucket('gs://bankpricesstore.appspot.com');
+  process.env.NODE_ENV === "development"
+    ? admin.storage().bucket("gs://bankpricestore-test.appspot.com")
+    : admin.storage().bucket("gs://bankpricesstore.appspot.com");
 
 export const addPrice = (bankPrice: IBankPrice) => {
   db.collection(bankPrice.name)
-    .doc(bankPrice.date != undefined ? bankPrice.date.toDateString() : '')
+    .doc(bankPrice.date != undefined ? bankPrice.date.toDateString() : "")
     .set(bankPrice)
     .then((vl) => {
       console.log(vl);
@@ -38,46 +38,45 @@ export const addPrice = (bankPrice: IBankPrice) => {
 };
 
 export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => {
-  for (let bank of bankPricesArr) {
+  for (const bank of bankPricesArr) {
     if (bank === undefined || bank === null || bank.error) continue;
 
-    let docRef = db.collection('banks').doc(bank.name);
-    let docData = await docRef.get();
-    let document = docData.data();
+    const docRef = db.collection("banks").doc(bank.name);
+    const docData = await docRef.get();
+    const document = docData.data();
 
-    let now = new Date();
-    let yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const now = new Date();
+    const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
 
     if (document !== undefined) {
       let lastPriceDoc: any = null;
       await docRef
-        .collection('prices')
-        .where('date', '>=', yesterday.toISOString())
+        .collection("prices")
+        .where("date", ">=", yesterday.toISOString())
         .limit(1)
         .get()
-        .then(function (querySnapshot) {
-          querySnapshot.forEach(function (doc) {
-            let d = doc.data();
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const d = doc.data();
             lastPriceDoc = d;
-            console.log(d);
           });
         })
-        .catch(function (error) {
-          console.log('Error getting documents: ', error);
+        .catch((error) => {
+          console.log("Error getting documents: ", error);
         });
 
       if (lastPriceDoc !== undefined) {
         if (lastPriceDoc.dollarBuy !== undefined) {
-          bank.USBuyChange = getTypeOfChange(bank, lastPriceDoc, 'dollarBuy');
+          bank.USBuyChange = getTypeOfChange(bank, lastPriceDoc, "dollarBuy");
         }
         if (lastPriceDoc.dollarSell !== undefined) {
-          bank.USSellChange = getTypeOfChange(bank, lastPriceDoc, 'dollarSell');
+          bank.USSellChange = getTypeOfChange(bank, lastPriceDoc, "dollarSell");
         }
         if (lastPriceDoc.euroBuy !== undefined) {
-          bank.EUBuyChange = getTypeOfChange(bank, lastPriceDoc, 'euroBuy');
+          bank.EUBuyChange = getTypeOfChange(bank, lastPriceDoc, "euroBuy");
         }
         if (lastPriceDoc.euroSell !== undefined) {
-          bank.EUSellChange = getTypeOfChange(bank, lastPriceDoc, 'euroSell');
+          bank.EUSellChange = getTypeOfChange(bank, lastPriceDoc, "euroSell");
         }
       }
     }
@@ -85,7 +84,7 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
     bank.date = new Date();
 
     docRef
-      .collection('prices')
+      .collection("prices")
       .doc(JSON.parse(JSON.stringify(bank.date)))
       .set(JSON.parse(JSON.stringify(bank)))
       .then((writeResult) => {
@@ -98,7 +97,7 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
       });
     } else {
       docRef.set(JSON.parse(JSON.stringify(bank)), { merge: true }).then((writeResult) => {
-        console.log('added bank to the store ' + bank?.name);
+        console.log("added bank to the store " + bank?.name);
       });
     }
   }
@@ -113,12 +112,12 @@ async function getWeeklyDifference(bankPricesArr: IBankPrice[]) {
   let sellAvg = 0;
   let buyLength = 0;
   let sellLength = 0;
-  const symbol = 'US';
+  const symbol = "US";
 
-  for (let bank of bankPricesArr) {
+  for (const bank of bankPricesArr) {
     if (bank === undefined) continue;
 
-    let avgCurrency = bank?.currency?.find((d) => d.symbol == symbol);
+    const avgCurrency = bank?.currency?.find((d) => d.symbol == symbol);
 
     if (avgCurrency != undefined) {
       if (avgCurrency.buy > 0) {
@@ -132,14 +131,14 @@ async function getWeeklyDifference(bankPricesArr: IBankPrice[]) {
     }
   }
 
-  let docRef = db.collection('notifications').doc('weekly');
-  let docData = await docRef.get();
-  let document = docData.data();
+  const docRef = db.collection("notifications").doc("weekly");
+  const docData = await docRef.get();
+  const document = docData.data();
 
-  let buyAvgToday = buyAvg / buyLength;
-  let sellAvgToday = sellAvg / sellLength;
+  const buyAvgToday = buyAvg / buyLength;
+  const sellAvgToday = sellAvg / sellLength;
 
-  let avgPrices = [{ buyAvg: buyAvgToday, sellAvg: sellAvgToday, symbol: symbol }];
+  const avgPrices = [{ buyAvg: buyAvgToday, sellAvg: sellAvgToday, symbol: symbol }];
 
   if (document == undefined || document.createdDate == undefined) {
     await docRef.set({
@@ -149,12 +148,12 @@ async function getWeeklyDifference(bankPricesArr: IBankPrice[]) {
   } else {
     const diffTime = Math.abs(document.createdDate.toDate() - new Date().getDate());
 
-    //a week has passed
+    // a week has passed
     if (Math.ceil(diffTime / (1000 * 60 * 60 * 24)) >= 1) {
-      let currencyAvg = document.avgPrices.find((c) => c.symbol == symbol);
+      const currencyAvg = document.avgPrices.find((c) => c.symbol == symbol);
 
-      let buyDifference = buyAvgToday - currencyAvg.buyAvg;
-      let sellDifference = sellAvgToday - currencyAvg.sellAvg;
+      const buyDifference = buyAvgToday - currencyAvg.buyAvg;
+      const sellDifference = sellAvgToday - currencyAvg.sellAvg;
 
       await docRef.set({
         avgPrices: avgPrices,
@@ -170,29 +169,29 @@ async function getWeeklyDifference(bankPricesArr: IBankPrice[]) {
 }
 
 const getTypeOfChange = (newObj: IBankPrice, oldObj: DocumentData, property: string) => {
-  return newObj[property] > oldObj[property] ? 'Increase' : newObj[property] == oldObj[property] ? 'Equal' : 'Decrease';
+  return newObj[property] > oldObj[property] ? "Increase" : newObj[property] == oldObj[property] ? "Equal" : "Decrease";
 };
 
 export const addBank = async (bank) => {
-  db.collection('banks')
+  db.collection("banks")
     .doc(bank.name)
     .set(JSON.parse(JSON.stringify(bank)), { merge: true })
     .then((writeResult) => {
-      console.log('added bank ' + bank.name);
+      console.log("added bank " + bank.name);
     });
 };
 
 export const uploadFile = async (filePath) => {
-  let file = await bucket.upload(filePath);
-  return file[0].getSignedUrl({ action: 'read', expires: '01-01-2500' });
+  const file = await bucket.upload(filePath);
+  return file[0].getSignedUrl({ action: "read", expires: "01-01-2500" });
 };
 
-///retrieve download url of the images in the bucket
+// /retrieve download url of the images in the bucket
 export const retrievePublicUrl = async () => {
-  let files = await bucket.getFiles();
+  const files = await bucket.getFiles();
   return await Promise.all(
     files[0].map(async (file) => {
-      let url = await file.getSignedUrl({ action: 'read', expires: '01-01-2500' });
+      const url = await file.getSignedUrl({ action: "read", expires: "01-01-2500" });
       return { name: path.basename(file.name, path.extname(file.name)), url: url[0] };
     }),
   );

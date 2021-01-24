@@ -9,7 +9,7 @@ export interface IBankInformation {
 }
 
 export enum BankCategory {
-  CreditUnion = 'creditUnion',
-  Agency = 'agency',
-  Bank = 'bank',
+  CreditUnion = "creditUnion",
+  Agency = "agency",
+  Bank = "bank",
 }

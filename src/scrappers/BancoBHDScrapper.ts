@@ -1,17 +1,16 @@
-import { ScrapperBaseHandler } from './ScrapperBaseHandler';
-import { Page } from 'puppeteer';
-import { IBankPrice } from '../models/bankprice';
-import { Banks } from '../models/bankName';
-import { CurrencySymbol } from '../models/currencyInfo';
+import { ScrapperBaseHandler } from "./ScrapperBaseHandler";
+import { Page } from "puppeteer";
+import { IBankPrice } from "../models/bankprice";
+import { Banks } from "../models/bankName";
+import { CurrencySymbol } from "../models/currencyInfo";
 
-// @ts-ignore
 export class BancoBHDScrapper extends ScrapperBaseHandler<BancoBHDScrapper> {
   async scrapeData(page: Page): Promise<IBankPrice> {
     this.bankName = Banks.BHDLeon;
-    this.usBuyElement = '#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(2)';
-    this.usSellElement = '#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(3)';
-    this.euBuyElement = '#TasasDeCambio > table > tbody > tr:nth-child(3) > td:nth-child(2)';
-    this.euSellElement = '#TasasDeCambio > table > tbody > tr:nth-child(3) > td:nth-child(3)';
+    this.usBuyElement = "#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(2)";
+    this.usSellElement = "#TasasDeCambio > table > tbody > tr:nth-child(2) > td:nth-child(3)";
+    this.euBuyElement = "#TasasDeCambio > table > tbody > tr:nth-child(3) > td:nth-child(2)";
+    this.euSellElement = "#TasasDeCambio > table > tbody > tr:nth-child(3) > td:nth-child(3)";
 
     this.currenciesElements = [
       {
@@ -21,7 +20,7 @@ export class BancoBHDScrapper extends ScrapperBaseHandler<BancoBHDScrapper> {
       },
     ];
 
-    await page.goto('https://www.bhdleon.com.do', this.puppeteerPageConfig);
+    await page.goto("https://www.bhdleon.com.do", this.puppeteerPageConfig);
     const dialogWithTasas = await page.$x("//a[contains(., 'Tasas de Cambio')]");
 
     await dialogWithTasas[0].click();
