@@ -5,28 +5,25 @@ import { IBankPrice } from "../models/bankprice";
 import * as path from "path";
 import * as admin from "firebase-admin";
 import { ServiceAccount } from "firebase-admin";
-import * as serviceAccount from "../../google-credentials-test.json";
-import DocumentData = admin.firestore.DocumentData;
+import { ICurrencyInfo } from "../models/currencyInfo";
 
 // const serviceAccount =
 //   process.env.NODE_ENV == 'development'
 //     ? await import('../../google-credentials-test.json')
 //     : await import('../../google-credentials.json');
 const params: ServiceAccount = {
-  projectId: serviceAccount.project_id,
-  privateKey: serviceAccount.private_key,
-  clientEmail: serviceAccount.client_email,
+  projectId: process.env.project_id,
+  privateKey: process.env.private_key?.replace(/\\n/g, "\n"),
+  clientEmail: process.env.client_email,
 };
 
+console.log(params);
 admin.initializeApp({
   credential: admin.credential.cert(params),
 });
 
 const db = admin.firestore();
-const bucket =
-  process.env.NODE_ENV === "development"
-    ? admin.storage().bucket("gs://bankpricestore-test.appspot.com")
-    : admin.storage().bucket("gs://bankpricesstore.appspot.com");
+const bucket = admin.storage().bucket("gs://bankpricestore-test.appspot.com");
 
 export const addPrice = (bankPrice: IBankPrice) => {
   db.collection(bankPrice.name)
@@ -39,18 +36,22 @@ export const addPrice = (bankPrice: IBankPrice) => {
 
 export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => {
   for (const bank of bankPricesArr) {
+    console.log("inserting");
     if (bank === undefined || bank === null || bank.error) continue;
 
     const docRef = db.collection("banks").doc(bank.name);
     const docData = await docRef.get();
     const document = docData.data();
 
+    console.log("inserting: " + bank.name);
+
     const now = new Date();
     const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
 
     if (document !== undefined) {
+      console.log("now the document: " + document);
       let lastPriceDoc: any = null;
-      await docRef
+      docRef
         .collection("prices")
         .where("date", ">=", yesterday.toISOString())
         .limit(1)
@@ -65,24 +66,21 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
           console.log("Error getting documents: ", error);
         });
 
-      if (lastPriceDoc !== undefined) {
-        if (lastPriceDoc.dollarBuy !== undefined) {
-          bank.USBuyChange = getTypeOfChange(bank, lastPriceDoc, "dollarBuy");
-        }
-        if (lastPriceDoc.dollarSell !== undefined) {
-          bank.USSellChange = getTypeOfChange(bank, lastPriceDoc, "dollarSell");
-        }
-        if (lastPriceDoc.euroBuy !== undefined) {
-          bank.EUBuyChange = getTypeOfChange(bank, lastPriceDoc, "euroBuy");
-        }
-        if (lastPriceDoc.euroSell !== undefined) {
-          bank.EUSellChange = getTypeOfChange(bank, lastPriceDoc, "euroSell");
-        }
+      console.log("prices retrieved: " + lastPriceDoc);
+      if (lastPriceDoc && lastPriceDoc.currency) {
+        const currencies: Array<ICurrencyInfo> = lastPriceDoc.currency;
+        currencies.forEach((oldCurrencyPrice) => {
+          const newCurrencyPrice = bank.currency?.find((v) => v.symbol == oldCurrencyPrice.symbol);
+          if (newCurrencyPrice) {
+            newCurrencyPrice.buyChange = getTypeOfChange(newCurrencyPrice, oldCurrencyPrice, true);
+            newCurrencyPrice.sellChange = getTypeOfChange(newCurrencyPrice, oldCurrencyPrice, false);
+          }
+        });
       }
     }
 
     bank.date = new Date();
-
+    console.log("que paso aqui");
     docRef
       .collection("prices")
       .doc(JSON.parse(JSON.stringify(bank.date)))
@@ -90,6 +88,7 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
       .then((writeResult) => {
         console.log(writeResult);
       });
+    console.log("inserted: " + bank.name);
 
     if (document !== undefined) {
       docRef.update(JSON.parse(JSON.stringify(bank))).then((writeResult) => {
@@ -168,8 +167,17 @@ async function getWeeklyDifference(bankPricesArr: IBankPrice[]) {
   //  return newVar;
 }
 
-const getTypeOfChange = (newObj: IBankPrice, oldObj: DocumentData, property: string) => {
-  return newObj[property] > oldObj[property] ? "Increase" : newObj[property] == oldObj[property] ? "Equal" : "Decrease";
+const getTypeOfChange = (currentCurrency: ICurrencyInfo, oldObj: ICurrencyInfo, isBuy: boolean) => {
+  if (currentCurrency) {
+    if (isBuy) {
+      if (currentCurrency.buy > oldObj.buy) return "increase";
+      if (currentCurrency.buy == oldObj.buy) return "equal";
+    } else {
+      if (currentCurrency.sell > oldObj.sell) return "increase";
+      if (currentCurrency.sell == oldObj.sell) return "equal";
+    }
+  }
+  return "decrease";
 };
 
 export const addBank = async (bank) => {

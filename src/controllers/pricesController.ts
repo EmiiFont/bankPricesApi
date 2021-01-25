@@ -18,14 +18,13 @@ export async function listPrices(req, res) {
   try {
     const logoUrls = await retrievePublicUrl();
 
-    bankNames.forEach((bank) => {
+    bankNames.forEach(async (bank) => {
       const url = logoUrls.find((c) => c.name == bank.name);
       if (url != undefined) {
         bank.imageUrl = url.url;
       }
-      addBank(bank);
+      await addBank(bank);
     });
-
     await addBankPrices(bankPrices);
     // let weekly = await getWeeklyDifference(bankPrices);
     // notificationService.sendWeeklyNotifcation(weekly);

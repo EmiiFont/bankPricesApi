@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run lint && npx tsc",
     "start": "npx tsc && node ./dist/src/index.js",
-    "dev": "export NODE_ENV=dev && npx tsc && node ./dist/src/index.js",
+    "dev": "export NODE_ENV=dev && npx tsc && node ./dist/index.js",
     "test": "jest",
     "lint": "eslint . --ext .ts"
   },

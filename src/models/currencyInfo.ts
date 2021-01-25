@@ -6,7 +6,7 @@ export interface ICurrencyInfo {
   buyChange?: ChangeType;
 }
 
-export type ChangeType = "change" | "increase" | "decrease";
+export type ChangeType = "equal" | "increase" | "decrease";
 
 export enum CurrencySymbol {
   US = "US",
