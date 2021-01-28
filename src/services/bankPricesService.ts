@@ -45,7 +45,11 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
     let lastPriceDoc: DocumentData = {};
 
     if (document !== undefined) {
-      let lastPriceDocQuery: QuerySnapshot = await docRef.collection("prices").where("date", ">=", yesterday.toISOString()).limit(1).get();
+      const lastPriceDocQuery: QuerySnapshot = await docRef
+        .collection("prices")
+        .where("date", ">=", yesterday.toISOString())
+        .limit(1)
+        .get();
       lastPriceDoc = lastPriceDocQuery.docs[0].data();
 
       if (lastPriceDoc) {
