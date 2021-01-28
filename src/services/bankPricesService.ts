@@ -50,6 +50,7 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
         .where("date", ">=", yesterday.toISOString())
         .limit(1)
         .get();
+
       lastPriceDoc = lastPriceDocQuery.docs[0].data();
 
       if (lastPriceDoc) {
