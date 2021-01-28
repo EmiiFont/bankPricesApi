@@ -6,8 +6,9 @@ import { CurrencySymbol } from "../models/currencyInfo";
 import { parseDecimalFromArrayOfString } from "../utils/utils";
 
 export class AgenciaQuezadaScrapper extends ScrapperBaseHandler<AgenciaQuezadaScrapper> {
+  bankName = Banks.Quezada;
+
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.Quezada;
     this.usBuyElement = ".blog-content-wrapper > .blog-content > ul > .da-ef > strong";
     this.euBuyElement = ".blog-content-wrapper > .blog-content > ul > .e-ef > strong";
     this.gbpBuyElement = ".blog-content-wrapper > .blog-content > ul > .le-ef > strong";

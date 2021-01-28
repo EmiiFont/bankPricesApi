@@ -5,8 +5,9 @@ import { Banks } from "../models/bankName";
 import { CurrencySymbol } from "../models/currencyInfo";
 
 export class AsociacionPeraviaScrapper extends ScrapperBaseHandler<AsociacionPeraviaScrapper> {
+  bankName = Banks.BancoPeravia;
+
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.BancoPeravia;
     this.usBuyElement = ".row > .col-sm-8 > .tasas > .compra:nth-child(2) > strong";
     this.usSellElement = ".row > .col-sm-8 > .tasas > .compra:nth-child(3) > strong";
 

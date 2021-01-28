@@ -6,9 +6,9 @@ import { CurrencySymbol } from "../models/currencyInfo";
 import { parseDecimalFromArrayOfString } from "../utils/utils";
 
 export class BanescoScrapper extends ScrapperBaseHandler<BanescoScrapper> {
-  async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.Banesco;
+  bankName = Banks.Banesco;
 
+  async scrapeData(page: Page): Promise<IBankPrice> {
     await page.goto("https://www.banesco.com.do/", this.puppeteerPageConfig);
 
     const pricesElement = await page.$(

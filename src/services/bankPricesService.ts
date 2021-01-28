@@ -6,11 +6,9 @@ import * as path from "path";
 import * as admin from "firebase-admin";
 import { ServiceAccount } from "firebase-admin";
 import { ICurrencyInfo } from "../models/currencyInfo";
+import QuerySnapshot = admin.firestore.QuerySnapshot;
+import DocumentData = admin.firestore.DocumentData;
 
-// const serviceAccount =
-//   process.env.NODE_ENV == 'development'
-//     ? await import('../../google-credentials-test.json')
-//     : await import('../../google-credentials.json');
 const params: ServiceAccount = {
   projectId: process.env.project_id,
   privateKey: process.env.private_key?.replace(/\\n/g, "\n"),
@@ -36,41 +34,24 @@ export const addPrice = (bankPrice: IBankPrice) => {
 
 export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => {
   for (const bank of bankPricesArr) {
-    console.log("inserting");
     if (bank === undefined || bank === null || bank.error) continue;
 
     const docRef = db.collection("banks").doc(bank.name);
     const docData = await docRef.get();
     const document = docData.data();
 
-    console.log("inserting: " + bank.name);
-
     const now = new Date();
     const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    let lastPriceDoc: DocumentData = {};
 
     if (document !== undefined) {
-      console.log("now the document: " + document);
-      let lastPriceDoc: any = null;
-      docRef
-        .collection("prices")
-        .where("date", ">=", yesterday.toISOString())
-        .limit(1)
-        .get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            const d = doc.data();
-            lastPriceDoc = d;
-          });
-        })
-        .catch((error) => {
-          console.log("Error getting documents: ", error);
-        });
+      let lastPriceDocQuery: QuerySnapshot = await docRef.collection("prices").where("date", ">=", yesterday.toISOString()).limit(1).get();
+      lastPriceDoc = lastPriceDocQuery.docs[0].data();
 
-      console.log("prices retrieved: " + lastPriceDoc);
-      if (lastPriceDoc && lastPriceDoc.currency) {
+      if (lastPriceDoc) {
         const currencies: Array<ICurrencyInfo> = lastPriceDoc.currency;
         currencies.forEach((oldCurrencyPrice) => {
-          const newCurrencyPrice = bank.currency?.find((v) => v.symbol == oldCurrencyPrice.symbol);
+          const newCurrencyPrice = bank.currency?.find((v) => v.symbol.includes(oldCurrencyPrice.symbol));
           if (newCurrencyPrice) {
             newCurrencyPrice.buyChange = getTypeOfChange(newCurrencyPrice, oldCurrencyPrice, true);
             newCurrencyPrice.sellChange = getTypeOfChange(newCurrencyPrice, oldCurrencyPrice, false);
@@ -80,24 +61,18 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
     }
 
     bank.date = new Date();
-    console.log("que paso aqui");
-    docRef
+    await docRef
       .collection("prices")
-      .doc(JSON.parse(JSON.stringify(bank.date)))
-      .set(JSON.parse(JSON.stringify(bank)))
-      .then((writeResult) => {
-        console.log(writeResult);
-      });
-    console.log("inserted: " + bank.name);
+      .doc(JSON.parse(JSON.stringify(bank.date.toLocaleDateString())))
+      .set(JSON.parse(JSON.stringify(bank)));
 
     if (document !== undefined) {
-      docRef.update(JSON.parse(JSON.stringify(bank))).then((writeResult) => {
-        console.log(writeResult);
-      });
+      await docRef.update(JSON.parse(JSON.stringify(bank)));
     } else {
-      docRef.set(JSON.parse(JSON.stringify(bank)), { merge: true }).then((writeResult) => {
+      const result = await docRef.set(JSON.parse(JSON.stringify(bank)), { merge: true });
+      if (result.writeTime) {
         console.log("added bank to the store " + bank?.name);
-      });
+      }
     }
   }
 };
@@ -106,12 +81,12 @@ export const addBankPrices = async (bankPricesArr: Array<IBankPrice | null>) => 
  * Gets the weekly difference of the average price (buys and sells) from a currency
  *
  */
-async function getWeeklyDifference(bankPricesArr: IBankPrice[]) {
+export async function getWeeklyDifference(bankPricesArr: IBankPrice[]) {
   let buyAvg = 0;
   let sellAvg = 0;
   let buyLength = 0;
   let sellLength = 0;
-  const symbol = "US";
+  const symbol = "USD";
 
   for (const bank of bankPricesArr) {
     if (bank === undefined) continue;
@@ -181,12 +156,10 @@ const getTypeOfChange = (currentCurrency: ICurrencyInfo, oldObj: ICurrencyInfo, 
 };
 
 export const addBank = async (bank) => {
-  db.collection("banks")
+  await db
+    .collection("banks")
     .doc(bank.name)
-    .set(JSON.parse(JSON.stringify(bank)), { merge: true })
-    .then((writeResult) => {
-      console.log("added bank " + bank.name);
-    });
+    .set(JSON.parse(JSON.stringify(bank)), { merge: true });
 };
 
 export const uploadFile = async (filePath) => {
@@ -204,10 +177,3 @@ export const retrievePublicUrl = async () => {
     }),
   );
 };
-
-module.exports.addBankPrices = addBankPrices;
-module.exports.addPrice = addPrice;
-module.exports.retrievePublicUrl = retrievePublicUrl;
-module.exports.addBank = addBank;
-module.exports.uploadFile = uploadFile;
-module.exports.getWeeklyDifference = getWeeklyDifference;

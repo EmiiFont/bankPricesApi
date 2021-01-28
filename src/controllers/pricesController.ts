@@ -5,10 +5,6 @@ import { ScrapperFacade } from "../scrappers/ScrapperFacade";
 import { addBank, addBankPrices, retrievePublicUrl } from "../services/bankPricesService";
 import { bankNames } from "../utils/bankNames";
 
-// const scraper = require('../utils/scraper');
-// const notificationService = require('../services/notificationService');
-// const bankNames = require('../utils/bankNames');
-
 export async function listPrices(req, res) {
   const browser = await puppeteer.launch();
 

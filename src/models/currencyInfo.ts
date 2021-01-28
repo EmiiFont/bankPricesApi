@@ -9,8 +9,8 @@ export interface ICurrencyInfo {
 export type ChangeType = "equal" | "increase" | "decrease";
 
 export enum CurrencySymbol {
-  US = "US",
-  EU = "EU",
+  US = "USD",
+  EU = "EUR",
   CHF = "CHF",
   GBP = "GBP",
   CAD = "CAD",

@@ -9,9 +9,9 @@ import { readDownloadedExcel } from "../utils/excelParser";
 import { promiseForStream } from "../utils/functionUtilities";
 
 export class BancoCentralScrapper extends ScrapperBaseHandler<BancoCentralScrapper> {
-  async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.BancoCentral;
+  bankName = Banks.BancoCentral;
 
+  async scrapeData(page: Page): Promise<IBankPrice> {
     let dollarPrices;
     let otherCurrencies;
     const fileNameUs = "bancocentraltasasus.xls";

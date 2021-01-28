@@ -5,8 +5,9 @@ import { Banks } from "../models/bankName";
 import { CurrencySymbol } from "../models/currencyInfo";
 
 export class BancoVimencaScrapper extends ScrapperBaseHandler<BancoVimencaScrapper> {
+  bankName = Banks.Vimenca;
+
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.Vimenca;
     this.usBuyElement = ".uk-clearfix:nth-child(1) > .layout-uikit > .uk-nbfc > .uk-margin > .purchaseValue";
     this.usSellElement = ".uk-clearfix:nth-child(1) > .layout-uikit > .uk-nbfc > .uk-margin > .saleValue";
     this.euBuyElement = ".uk-clearfix:nth-child(2) > .layout-uikit > .uk-nbfc > .uk-margin > .purchaseValue";

@@ -6,8 +6,8 @@ import { CurrencySymbol, ICurrencyInfo } from "../models/currencyInfo";
 import { parseDecimalFromArrayOfString } from "../utils/utils";
 
 export class BancoLopezDeHaroScrapper extends ScrapperBaseHandler<BancoLopezDeHaroScrapper> {
+  bankName = Banks.LopezDeHaro;
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.LopezDeHaro;
     this.usBuyElement = ".instance-5 > .vc_column-inner > .wpb_wrapper > .iwithtext > .iwt-text > p";
 
     this.currenciesElements = [

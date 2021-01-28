@@ -6,9 +6,9 @@ import { CurrencySymbol } from "../models/currencyInfo";
 import { getTextContentForPrices } from "../utils/utils";
 
 export class BancoEmpireScrapper extends ScrapperBaseHandler<BancoEmpireScrapper> {
-  async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.BancoEmpire;
+  bankName = Banks.BancoEmpire;
 
+  async scrapeData(page: Page): Promise<IBankPrice> {
     await page.goto("https://www.bancoempire.com.do", this.puppeteerPageConfig);
 
     const frames = await page.frames();

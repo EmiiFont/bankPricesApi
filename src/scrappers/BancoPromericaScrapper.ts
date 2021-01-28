@@ -5,8 +5,8 @@ import { Banks } from "../models/bankName";
 import { CurrencySymbol } from "../models/currencyInfo";
 
 export class BancoPromericaScrapper extends ScrapperBaseHandler<BancoPromericaScrapper> {
+  bankName = Banks.Promerica;
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.Promerica;
     this.usBuyElement = ".container > .row > #tipoCambioHome > .col-sm-6 > .cambio > span:nth-child(1)";
     this.usSellElement = ".container > .row > #tipoCambioHome > .col-sm-6 > .cambio > span:nth-child(3)";
     this.euBuyElement = "#hcompra";

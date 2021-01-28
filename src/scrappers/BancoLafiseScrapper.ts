@@ -5,8 +5,8 @@ import { Banks } from "../models/bankName";
 import { CurrencySymbol } from "../models/currencyInfo";
 
 export class BancoLafiseScrapper extends ScrapperBaseHandler<BancoLafiseScrapper> {
+  bankName = Banks.LaFise;
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.LaFise;
     this.usBuyElement = ".ng-scope > .lafise-group > .lista:nth-child(1) > .lafise-TasaCambio > .lafise-valorCompra:nth-child(4)";
     this.usSellElement = ".ng-scope > .lafise-group > .lista:nth-child(1) > .lafise-TasaCambio > .lafise-valorVenta:nth-child(5)";
     this.euBuyElement = ".ng-scope > .lafise-group > .lista:nth-child(2) > .lafise-TasaCambio > .lafise-valorCompra:nth-child(4)";

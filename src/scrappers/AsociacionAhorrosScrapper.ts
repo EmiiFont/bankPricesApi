@@ -4,9 +4,8 @@ import { IBankPrice } from "../models/bankprice";
 import { Banks } from "../models/bankName";
 
 export class AsociacionAhorrosScrapper extends ScrapperBaseHandler<AsociacionAhorrosScrapper> {
+  bankName = Banks.AsociacionPopular;
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.AsociacionPopular;
-
     await page.goto("https://www.apap.com.do/calculadoras/", this.puppeteerPageConfig);
 
     await page.waitForSelector("#navbarNav #currency-label");

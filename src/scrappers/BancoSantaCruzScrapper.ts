@@ -5,9 +5,8 @@ import { Banks } from "../models/bankName";
 import { CurrencySymbol, ICurrencyInfo } from "../models/currencyInfo";
 
 export class BancoSantaCruzScrapper extends ScrapperBaseHandler<BancoSantaCruzScrapper> {
+  bankName = Banks.SantaCruz;
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.SantaCruz;
-
     await page.goto("https://www.bsc.com.do/dynresources/wj/bsc/v1/divisas", this.puppeteerPageConfig);
 
     const parsedJson = await page.evaluate(() => {

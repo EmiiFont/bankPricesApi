@@ -5,8 +5,9 @@ import { Banks } from "../models/bankName";
 import { CurrencySymbol } from "../models/currencyInfo";
 
 export class BancoActivoScrapper extends ScrapperBaseHandler<BancoActivoScrapper> {
+  bankName = Banks.BancoActivo;
+
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.BancoActivo;
     this.usBuyElement = ".table > tbody > tr > td:nth-child(2) > .subtitulo-dolar";
     this.usSellElement = ".table > tbody > tr > td:nth-child(3) > .subtitulo-dolar";
     this.euBuyElement = ".table > tbody > tr > td:nth-child(2) > .subtitulo-euro";

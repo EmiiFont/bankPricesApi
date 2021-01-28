@@ -6,8 +6,8 @@ import { CurrencySymbol } from "../models/currencyInfo";
 import { parseDecimalFromArrayOfString } from "../utils/utils";
 
 export class BancoBonanzaScrapper extends ScrapperBaseHandler<BancoBonanzaScrapper> {
+  bankName = Banks.Bonanza;
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.Bonanza;
     this.usBuyElement = ".row > .col-md-6 > #topbar-search > .textwidget > marquee";
 
     await page.goto("https://www.bonanzabanco.com.do/", this.puppeteerPageConfig);

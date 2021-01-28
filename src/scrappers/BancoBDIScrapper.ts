@@ -5,8 +5,9 @@ import { Banks } from "../models/bankName";
 import { CurrencySymbol } from "../models/currencyInfo";
 
 export class BancoBDIScrapper extends ScrapperBaseHandler<BancoBDIScrapper> {
+  bankName = Banks.Bdi;
+
   async scrapeData(page: Page): Promise<IBankPrice> {
-    this.bankName = Banks.Bdi;
     this.usBuyElement = ".container > .row > .col-sm-6 > .flright > li:nth-child(4)";
     this.usSellElement = ".container > .row > .col-sm-6 > .flright > .mc_xs_item";
     this.euBuyElement = ".container > .row > .separator > .mc_list > li:nth-child(4)";
